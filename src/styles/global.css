@@ -1,0 +1,79 @@
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    padding: 0 ;
+}
+form.purchase_order_form label {
+    color: #727281;
+}
+form.purchase_order_form .css-hlgwow{
+    padding-left: 10px;
+    color: #000;
+    font-weight: 500;
+}
+form.purchase_order_form .css-1jqq78o-placeholder, form.purchase_order_form input::placeholder {
+    color: #b0b0b0;
+    font-size: 14px;
+    font-weight:500;
+}
+form.purchase_order_form input {
+    height: 38px;
+    border: 1px solid rgb(204, 204, 204);
+    border-radius: 4px;
+    padding-left: 10px;
+}
+form.purchase_order_form .css-13cymwt-control input, form.purchase_order_form .css-t3ipsp-control input {
+    height: auto !important;
+}
+form.purchase_order_form .css-1u9des2-indicatorSeparator {
+    display: none;
+}
+form.purchase_order_form .react-datepicker-wrapper{
+    width: 100%;
+}
+form.purchase_order_form .react-datepicker-wrapper input {
+    padding-left: 10px;
+    width: 100%;
+} 
+form.purchase_order_form .css-t3ipsp-control:hover, form.purchase_order_form .css-t3ipsp-control {
+    border-color: #000;
+    box-shadow: none;
+    height: 38px;
+}
+.react-datepicker__input-container::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 18px;
+    width: 18px;
+    background-image: url("data:image/svg+xml,%3Csvg width='18px' height='18px' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg' fill='%23727281'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M14.5 2H13V1h-1v1H4V1H3v1H1.5l-.5.5v12l.5.5h13l.5-.5v-12l-.5-.5zM14 14H2V5h12v9zm0-10H2V3h12v1zM4 8H3v1h1V8zm-1 2h1v1H3v-1zm1 2H3v1h1v-1zm2-4h1v1H6V8zm1 2H6v1h1v-1zm-1 2h1v1H6v-1zm1-6H6v1h1V6zm2 2h1v1H9V8zm1 2H9v1h1v-1zm-1 2h1v1H9v-1zm1-6H9v1h1V6zm2 2h1v1h-1V8zm1 2h-1v1h1v-1zm-1-4h1v1h-1V6z'/%3E%3C/svg%3E");
+    background-size: cover;
+}
+.talentCheckbox .checkbox_control {
+    border: 2px solid rgb(204, 204, 204) !important;
+}
+.talentCheckbox .checkbox_control:after {
+    content: "";
+    position: absolute;
+    left: 18px;
+    top: 5px;
+    width: 5px;
+    height: 10px;
+    border: solid black;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    display: none;
+}
+.talentCheckbox .checkbox_input:checked~.checkbox_control:after {
+    display: block;
+}
+.placeholder-right-text {
+    color: #b0b0b0;
+    right: 22px;
+    top: 50%;
+    font-size: 18px,
+}
