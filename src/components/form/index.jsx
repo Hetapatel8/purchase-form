@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import DatePicker from "react-datepicker";
 import { clientData, currencies, orderType } from "../../utils/formData";
@@ -9,11 +9,7 @@ const PurchaseForm = () => {
     jobTitle: "",
     jobId: "",
     talents: [],
-    currency: "",
-    contractDuration: "",
-    billRate: "",
-    standardTime: "",
-    overTime: "",
+    talentDetails: []
   };
 
   const [formData, setFormData] = useState({
@@ -43,9 +39,23 @@ const PurchaseForm = () => {
     label: client.clientName.label,
   }));
 
+  const [isCheckedArray, setIsCheckedArray] = useState([]);
+
+useEffect(() => {
+  setIsCheckedArray(new Array(talentDetails.length * talentDetails[0].talents.length).fill(false));
+}, [talentDetails]);
+
+const handleCheckboxChange = (index, tmp_index) => {
+  setIsCheckedArray((prevState) => {
+    const newState = [...prevState];
+    newState[index * talentDetails[0].talents.length + tmp_index] = !newState[index * talentDetails[0].talents.length + tmp_index];
+    return newState;
+  });
+};
+
   const handleSelectChange = (name, value, index) => {
     setSelectedOption((prev) => ({ ...prev, [name]: value }));
-
+  
     if (name === "clientNames" && value) {
       const selectedClient = clientData.find(
         (client) => client.id === value.value
@@ -54,29 +64,36 @@ const PurchaseForm = () => {
         selectedClient?.jobData.map((job) => ({
           value: job.jobId,
           label: job.label,
-          talents: job.talentData, // Assuming talents are in jobData
+          talents: job.talentData,
         })) || [];
       setJobOptions(jobs);
       setTalentDetails([initialTalentDetail]);
     }
-
+  
     if (name === "jobTitle" && value) {
-      const selectedJob = jobOptions.find(
-        (option) => option.label === value.label
-      );
+      const selectedJob = jobOptions.find((option) => option.label === value.label);
       setTalentDetails((prevDetails) => {
         const newDetails = [...prevDetails];
         if (index < newDetails.length) {
           newDetails[index] = {
             ...newDetails[index],
+            jobTitle: value.label, // Set jobTitle explicitly
             jobId: selectedJob ? selectedJob.value : "",
-            talents: selectedJob ? selectedJob.talents : [], // Set talents here
+            talents: selectedJob ? selectedJob.talents : [],
+            talentDetails: selectedJob ? selectedJob.talents.map(() => ({
+              contractDuration: "",
+              billRate: "",
+              standardTime: "",
+              overTime: "",
+              currency: ""
+            })) : []
           };
         }
         return newDetails;
       });
     }
   };
+  
 
   const handleInputChange = (name, value) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -86,18 +103,15 @@ const PurchaseForm = () => {
     setTalentDetails((prevDetails) => {
       const newDetails = [...prevDetails]; // Create a copy of the current talent details
       const talent = { ...newDetails[index] }; // Get the specific talent detail
-
+  
       if (tmpIndex < talent.talents.length) {
-        // Create a new object to update
-        talent[name] = value; // Update the specific field
-
+        talent.talentDetails[tmpIndex][name] = value; // Update the specific field for the talent
         newDetails[index] = talent; // Replace the old talent with the updated one
       }
-
+      
       return newDetails; // Return the updated details
     });
   };
-
   const addAnotherTalentSection = () => {
     setTalentDetails([...talentDetails, initialTalentDetail]);
   };
@@ -117,19 +131,42 @@ const PurchaseForm = () => {
   };
 
   const handleSave = () => {
-    console.log("Form Data:", {
+    // Check if required fields are filled
+    if (
+      !selectedOption.clientNames ||
+      !formData.orderType ||
+      !formData.orderNumber ||
+      !dates.receivedDate ||
+      !formData.receiverName ||
+      !formData.receiverEmail ||
+      !dates.startDate ||
+      !dates.endDate ||
+      !formData.budget ||
+      !selectedOption.currencies
+    ) {
+      alert("Please fill all the required fields.");
+      return;
+    }
+  
+    // Proceed with saving the form if all validations pass
+    const fullData = {
       formData,
       selectedOption,
       dates,
       talentDetails,
-    });
+    };
+    console.log('Form Data', fullData)
+    localStorage.setItem('formData', JSON.stringify(fullData));
+    alert("Form saved successfully!");
+
   };
+  
 
   return (
-    <form className="purchase_order_form px-4">
+    <form className="purchase_order_form px-md-4 px-3">
       <div className="purchase_details_section">
         <div className="row">
-          <div className="col">
+          <div className="col-xl col-md-6 mb-xl-0 mb-md-3 mt-2">
             <label htmlFor="clientName" className="mb-1 fw-medium">
               Client Name{" "}
               <span className="fs-6 fw-bold ms-1" style={{ color: "red" }}>
@@ -145,7 +182,7 @@ const PurchaseForm = () => {
               required
             />
           </div>
-          <div className="col">
+          <div className="col-xl col-md-6 mb-xl-0 mb-md-3 mt-2">
             <label htmlFor="orderType" className="mb-1 fw-medium">
               Purchase Order Type
               <span className="fs-6 fw-bold ms-1" style={{ color: "red" }}>
@@ -158,9 +195,10 @@ const PurchaseForm = () => {
               options={orderType}
               id="orderType"
               name="orderType"
+              required
             />
           </div>
-          <div className="col">
+          <div className="col-md col-12 mb-md-0 mt-2">
             <label htmlFor="orderNumber" className="mb-1 fw-medium">
               Purchase Order No.
               <span className="fs-6 fw-bold ms-1" style={{ color: "red" }}>
@@ -175,9 +213,10 @@ const PurchaseForm = () => {
               name="orderNumber"
               value={formData.orderNumber}
               onChange={(e) => handleInputChange("orderNumber", e.target.value)}
+              required
             />
           </div>
-          <div className="col">
+          <div className="col-md col-12 mb-md-0 mt-2">
             <label htmlFor="ReceivedOn" className="mb-1 d-block fw-medium">
               Received On
               <span className="fs-6 fw-bold ms-1" style={{ color: "red" }}>
@@ -189,12 +228,13 @@ const PurchaseForm = () => {
               onChange={(date) =>
                 setDates((prev) => ({ ...prev, receivedDate: date }))
               }
+              required
               placeholderText="Received On"
             />
           </div>
         </div>
-        <div className="row mt-4 align-items-end">
-          <div className="col">
+        <div className="row mt-xxl-4 mt-md-3 mt-2 align-items-end ">
+          <div className="col-xxl col-md-6 mb-xxl-0 mb-3">
             <div>
               <label htmlFor="ReceiverName" className="mb-1 fw-medium">
                 Received From
@@ -212,10 +252,11 @@ const PurchaseForm = () => {
                 onChange={(e) =>
                   handleInputChange("receiverName", e.target.value)
                 }
+                required
               />
             </div>
           </div>
-          <div className="col">
+          <div className="col-xxl col-md-6 mb-xxl-0 mb-md-3 mb-2">
             <input
               className="d-block col-12 "
               placeholder="Received From Email ID"
@@ -226,9 +267,10 @@ const PurchaseForm = () => {
               onChange={(e) =>
                 handleInputChange("receiverEmail", e.target.value)
               }
+              required
             />
           </div>
-          <div className="col">
+          <div className="col-md col-12 mb-md-0 mb-2">
             <label htmlFor="startDate" className="mb-1 d-block fw-medium">
               PO Start Date
               <span className="fs-6 fw-bold ms-1" style={{ color: "red" }}>
@@ -240,10 +282,11 @@ const PurchaseForm = () => {
               onChange={(date) =>
                 setDates((prev) => ({ ...prev, startDate: date }))
               }
+              required
               placeholderText="Start Date"
             />
           </div>
-          <div className="col">
+          <div className="col-md col-12 mb-md-0 mb-2">
             <label htmlFor="endDate" className="mb-1 d-block fw-medium">
               PO End Date
               <span className="fs-6 fw-bold ms-1" style={{ color: "red" }}>
@@ -257,9 +300,10 @@ const PurchaseForm = () => {
               }
               minDate={dates.startDate}
               placeholderText="End Date"
+              required
             />
           </div>
-          <div className="col">
+          <div className="col-md col-12 mb-md-0 mb-2">
             <label htmlFor="budget" className="mb-1 fw-medium ">
               Budget
               <span className="fs-6 fw-bold ms-1" style={{ color: "red" }}>
@@ -278,9 +322,10 @@ const PurchaseForm = () => {
               type="text"
               id="budget"
               name="budget"
+              required
             />
           </div>
-          <div className="col">
+          <div className="col-md col-12">
             <label htmlFor="budget" className="mb-1 fw-medium">
               Currency
               <span className="fs-6 fw-bold ms-1" style={{ color: "red" }}>
@@ -291,17 +336,18 @@ const PurchaseForm = () => {
               value={selectedOption.currencies}
               onChange={(value) => handleSelectChange("currencies", value)}
               options={currencies}
+              required
             />
           </div>
         </div>
-        <div className=" mt-4">
+        <div className=" mt-xxl-4 mt-3">
           <div className="d-flex justify-content-between align-items-center">
             <h5 className="fs-5 lh-base fw-medium mb-0 text-black py-1">
               Talent Detail
             </h5>
             {formData.orderType?.value === "Group PO" && (
               <div
-                className="pt-1 pb-2 px-3 d-flex justify-content-between align-items-center border border-dark fs-6 fw-medium rounded-pill lh-base"
+                className="pt-1 pb-md-2 pb-1 px-md-3 px-2 d-flex justify-content-between align-items-center border border-dark fs-6 fw-medium rounded-pill lh-base"
                 style={{ cursor: "pointer" }}
                 onClick={addAnotherTalentSection}
               >
@@ -311,9 +357,9 @@ const PurchaseForm = () => {
           </div>
           {talentDetails.map((talent, index) => (
             <div className="talent_detail_section mb-5" key={index}>
-              <div className="row mt-4">
-                <div className="col-6 flex-row d-flex mb-3">
-                  <div className="col-6" style={{ paddingRight: 12 }}>
+              <div className="row  mt-xxl-4 mt-3">
+                <div className="col-xl-6 col-12 flex-md-row flex-column d-flex mb-3">
+                  <div className="col-md-6 col-12 p-remove mb-md-0 mb-2" style={{ paddingRight: 12 }}>
                     <label htmlFor="jobTitle" className="mb-1 fw-medium">
                       JOB Title/REQ Name{" "}
                       <span
@@ -334,7 +380,7 @@ const PurchaseForm = () => {
                       required
                     />
                   </div>
-                  <div className="col-6" style={{ paddingLeft: 12 }}>
+                  <div className="col-md-6 col-12 p-remove" style={{ paddingLeft: 12 }}>
                     <label htmlFor="jobId" className="mb-1 fw-medium">
                       JOB ID/REQ ID{" "}
                       <span
@@ -352,6 +398,7 @@ const PurchaseForm = () => {
                       name="jobId"
                       value={talent.jobId}
                       readOnly
+                      
                     />
                   </div>
                 </div>
@@ -372,7 +419,9 @@ const PurchaseForm = () => {
                       className="position-absolute opacity-0 border-0 checkbox_input"
                       type="checkbox"
                       value=""
-                      id={`talentCheckbox_${index}`}
+                      id={`talentCheckbox_${tmp_index}`}
+                      checked={isCheckedArray[index * talentDetails[0].talents.length + tmp_index] !== undefined ? isCheckedArray[index * talentDetails[0].talents.length + tmp_index] : false}
+                      onChange={() => handleCheckboxChange(index, tmp_index)}
                       style={{
                         width: 18,
                         height: 18,
@@ -394,9 +443,9 @@ const PurchaseForm = () => {
                     </span>
                   </label>
                   <div className="row mt-3 px-0 mx-0">
-                    <div className="col-6 flex-row d-flex pe-0">
+                    <div className="col-xxl-6 col-12 flex-md-row flex-column d-flex pe-xxl-0">
                       <div
-                        className="col-6 position-relative"
+                        className="col-xxl-6 col-md-4 col-12 mb-md-0 mb-2 position-relative p-remove"
                         style={{ paddingRight: 12 }}
                       >
                         <label htmlFor="orderNumber" className="mb-1 fw-medium">
@@ -408,7 +457,7 @@ const PurchaseForm = () => {
                           type="text"
                           id={`contractDuration_${index}_${tmp_index}`}
                           name="contractDuration"
-                          value={talent.contractDuration || ""}
+                          value={talent.talentDetails[tmp_index].contractDuration || ""}
                           onChange={(e) =>
                             handleTalentChange(
                               "contractDuration",
@@ -429,7 +478,7 @@ const PurchaseForm = () => {
                         </span>
                       </div>
                       <div
-                        className="col-3 position-relative"
+                        className="col-xxl-3 col-md-4 mb-md-0 mb-2 position-relative p-remove"
                         style={{ paddingRight: 12 }}
                       >
                         <label htmlFor="orderNumber" className="mb-1 fw-medium">
@@ -441,7 +490,7 @@ const PurchaseForm = () => {
                           type="text"
                           id={`billRate_${index}_${tmp_index}`}
                           name="billRate"
-                          value={talentDetails[index]?.billRate || ""}
+                          value={talent.talentDetails[tmp_index].billRate || ""}
                           onChange={(e) =>
                             handleTalentChange(
                               "billRate",
@@ -461,12 +510,12 @@ const PurchaseForm = () => {
                           /hr
                         </span>
                       </div>
-                      <div className="col-3" style={{ paddingRight: 12 }}>
+                      <div className="col-xxl-3 col-md-4 p-remove" style={{ paddingRight: 12 }}>
                         <label htmlFor="budget" className="mb-1 fw-medium">
                           Currency
                         </label>
                         <Select
-                          defaultValue={talentDetails[index]?.currency || ""}
+                          defaultValue={talent.talentDetails[tmp_index].currency || ""}
                           onChange={(value) =>
                             handleTalentChange("currencies", value, index)
                           }
@@ -474,9 +523,9 @@ const PurchaseForm = () => {
                         />
                       </div>
                     </div>
-                    <div className="col-6 flex-row d-flex ps-0">
+                    <div className="col-xxl-6 col-12 flex-md-row flex-column d-flex ps-xxl-0 mt-xxl-0 mt-3">
                       <div
-                        className="col-3 position-relative"
+                        className="col-md-3 col-12 position-relative mb-md-0 mb-2 p-remove"
                         style={{ paddingRight: 12 }}
                       >
                         <label htmlFor="orderNumber" className="mb-1 fw-medium">
@@ -488,7 +537,7 @@ const PurchaseForm = () => {
                           type="text"
                           id={`standardTime_${index}_${tmp_index}`}
                           name="standardTime"
-                          value={talentDetails[index]?.standardTime || ""}
+                          value={talent.talentDetails[tmp_index].standardTime || ""}
                           onChange={(e) =>
                             handleTalentChange(
                               "standardTime",
@@ -508,12 +557,12 @@ const PurchaseForm = () => {
                           /hr
                         </span>
                       </div>
-                      <div className="col-3" style={{ paddingRight: 12 }}>
+                      <div className="col-md-3 col-12 position-relative mb-md-0 mb-2 p-remove" style={{ paddingRight: 12 }}>
                         <label htmlFor="budget" className="mb-1 fw-medium">
                           Currency
                         </label>
                         <Select
-                          defaultValue={talentDetails[index]?.currency || ""}
+                          defaultValue={talent.talentDetails[tmp_index].currency || ""}
                           onChange={(value) =>
                             handleTalentChange("currencies", value, index)
                           }
@@ -521,7 +570,7 @@ const PurchaseForm = () => {
                         />
                       </div>
                       <div
-                        className="col-3 position-relative"
+                        className="col-md-3 col-12 position-relative mb-md-0 mb-2 p-remove"
                         style={{ paddingRight: 12 }}
                       >
                         <label htmlFor="orderNumber" className="mb-1 fw-medium">
@@ -533,7 +582,7 @@ const PurchaseForm = () => {
                           type="text"
                           id={`overTime_${index}_${tmp_index}`}
                           name="overTime"
-                          value={talentDetails[index]?.overTime || ""}
+                          value={talent.talentDetails[tmp_index].overTime || ""}
                           onChange={(e) =>
                             handleTalentChange(
                               "overTime",
@@ -553,12 +602,12 @@ const PurchaseForm = () => {
                           /hr
                         </span>
                       </div>
-                      <div className="col-3">
+                      <div className="col-md-3 col-12 position-relative mb-md-0 mb-2">
                         <label htmlFor="budget" className="mb-1 fw-medium">
                           Currency
                         </label>
                         <Select
-                          defaultValue={talentDetails[index]?.currency || ""}
+                          defaultValue={talent.talentDetails[tmp_index].currency || ""}
                           onChange={(value) =>
                             handleTalentChange("currencies", value, index)
                           }

@@ -77,3 +77,27 @@ form.purchase_order_form .css-t3ipsp-control:hover, form.purchase_order_form .cs
     top: 50%;
     font-size: 18px,
 }
+@media only screen and (max-width: 1500px) {
+    form.purchase_order_form input {
+        padding-left:4px;
+    }
+}
+@media only screen and (max-width: 1024px) {
+    form.purchase_order_form input {
+        padding-left:8px;
+        font-size: 12px;
+    }
+    form.purchase_order_form .css-1jqq78o-placeholder, form.purchase_order_form input::placeholder, form.purchase_order_form .css-hlgwow {
+        font-size: 14px;
+    }
+    .placeholder-right-text {
+        font-size: 14px;
+        top: 54%;
+    }
+    
+}
+@media only screen and (max-width: 767px) {
+    .talent_detail_section .p-remove {
+        padding: 0 !important;
+    }
+}
