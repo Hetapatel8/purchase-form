@@ -80,7 +80,7 @@ const handleCheckboxChange = (index, tmp_index) => {
         if (index < newDetails.length) {
           newDetails[index] = {
             ...newDetails[index],
-            jobTitle: value.label, // Set jobTitle explicitly
+            jobTitle: value.label,
             jobId: selectedJob ? selectedJob.value : "",
             talents: selectedJob ? selectedJob.talents : [],
             talentDetails: selectedJob ? selectedJob.talents.map(() => ({
@@ -103,15 +103,15 @@ const handleCheckboxChange = (index, tmp_index) => {
 
   const handleTalentChange = (name, value, index, tmpIndex) => {
     setTalentDetails((prevDetails) => {
-      const newDetails = [...prevDetails]; // Create a copy of the current talent details
-      const talent = { ...newDetails[index] }; // Get the specific talent detail
+      const newDetails = [...prevDetails]; 
+      const talent = { ...newDetails[index] }; 
   
       if (tmpIndex < talent.talents.length) {
-        talent.talentDetails[tmpIndex][name] = value; // Update the specific field for the talent
-        newDetails[index] = talent; // Replace the old talent with the updated one
+        talent.talentDetails[tmpIndex][name] = value; 
+        newDetails[index] = talent;
       }
       
-      return newDetails; // Return the updated details
+      return newDetails;
     });
   };
   const addAnotherTalentSection = () => {
@@ -133,7 +133,6 @@ const handleCheckboxChange = (index, tmp_index) => {
   };
 
   const handleSave = () => {
-    // Check if required fields are filled
     if (
       !selectedOption.clientNames ||
       !formData.orderType ||
@@ -149,8 +148,6 @@ const handleCheckboxChange = (index, tmp_index) => {
       alert("Please fill all the required fields.");
       return;
     }
-  
-    // Get the checked talent details
     const checkedTalents = talentDetails.map((talent, index) => {
       const checkedTalentDetails = talent.talents.filter((tmp_talent, tmp_index) => {
         return isCheckedArray[index * talentDetails[0].talents.length + tmp_index] !== undefined;
@@ -170,8 +167,7 @@ const handleCheckboxChange = (index, tmp_index) => {
         talents: checkedTalentDetails,
       };
     }).filter((talent) => talent.talents.length > 0);
-  
-    // Proceed with saving the form if all validations pass
+    
     const fullData = {
       formData,
       selectedOption,
