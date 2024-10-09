@@ -97,7 +97,6 @@ const handleCheckboxChange = (index, tmp_index) => {
     }
   };
   
-
   const handleInputChange = (name, value) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -151,12 +150,33 @@ const handleCheckboxChange = (index, tmp_index) => {
       return;
     }
   
+    // Get the checked talent details
+    const checkedTalents = talentDetails.map((talent, index) => {
+      const checkedTalentDetails = talent.talents.filter((tmp_talent, tmp_index) => {
+        return isCheckedArray[index * talentDetails[0].talents.length + tmp_index] !== undefined;
+      }).map((tmp_talent, tmp_index) => {
+        return {
+          talentName: tmp_talent,
+          contractDuration: talent.talentDetails[tmp_index].contractDuration,
+          billRate: talent.talentDetails[tmp_index].billRate,
+          standardTime: talent.talentDetails[tmp_index].standardTime,
+          overTime: talent.talentDetails[tmp_index].overTime,
+          currency: talent.talentDetails[tmp_index].currency,
+        };
+      });
+      return {
+        jobTitle: talent.jobTitle,
+        jobId: talent.jobId,
+        talents: checkedTalentDetails,
+      };
+    }).filter((talent) => talent.talents.length > 0);
+  
     // Proceed with saving the form if all validations pass
     const fullData = {
       formData,
       selectedOption,
       dates,
-      talentDetails,
+      talentDetails: checkedTalents,
     };
     console.log('Form Data', fullData)
     localStorage.setItem('formData', JSON.stringify(fullData));
