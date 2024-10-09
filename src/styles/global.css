@@ -24,7 +24,9 @@ form.purchase_order_form input {
     border-radius: 4px;
     padding-left: 10px;
 }
-form.purchase_order_form .css-13cymwt-control input, form.purchase_order_form .css-t3ipsp-control input {
+
+form.purchase_order_form .css-13cymwt-control input, form.purchase_order_form .css-t3ipsp-control input, 
+form.purchase_order_form .css-16xfy0z-control input {
     height: auto !important;
 }
 form.purchase_order_form .css-1u9des2-indicatorSeparator {
@@ -78,7 +80,7 @@ form.purchase_order_form .css-t3ipsp-control:hover, form.purchase_order_form .cs
     font-size: 18px,
 }
 @media only screen and (max-width: 1500px) {
-    form.purchase_order_form input {
+    form.purchase_order_form input, form.purchase_order_form .react-datepicker-wrapper input, form.purchase_order_form .css-hlgwow {
         padding-left:4px;
     }
 }

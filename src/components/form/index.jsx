@@ -3,6 +3,8 @@ import Select from "react-select";
 import DatePicker from "react-datepicker";
 import { clientData, currencies, orderType } from "../../utils/formData";
 import "react-datepicker/dist/react-datepicker.css";
+import CustomDropdownIndicator from "../CustomDropdownIndicator";
+import CustomClearIndicator from "../CustomClearIndicator";
 
 const PurchaseForm = () => {
   const initialTalentDetail = {
@@ -40,6 +42,7 @@ const PurchaseForm = () => {
   }));
 
   const [isCheckedArray, setIsCheckedArray] = useState([]);
+  const [isFormSaved, setIsFormSaved] = useState(false);
 
 useEffect(() => {
   setIsCheckedArray(new Array(talentDetails.length * talentDetails[0].talents.length).fill(false));
@@ -158,7 +161,7 @@ const handleCheckboxChange = (index, tmp_index) => {
     console.log('Form Data', fullData)
     localStorage.setItem('formData', JSON.stringify(fullData));
     alert("Form saved successfully!");
-
+    setIsFormSaved(true);
   };
   
 
@@ -174,12 +177,15 @@ const handleCheckboxChange = (index, tmp_index) => {
               </span>
             </label>
             <Select
+              components={{DropdownIndicator: CustomDropdownIndicator, ClearIndicator: CustomClearIndicator}}
               value={selectedOption.clientNames}
               onChange={(value) => handleSelectChange("clientNames", value)}
               options={clientNames}
               id="clientName"
               name="clientName"
               required
+              isDisabled={isFormSaved}
+              isClearable
             />
           </div>
           <div className="col-xl col-md-6 mb-xl-0 mb-md-3 mt-2">
@@ -190,12 +196,15 @@ const handleCheckboxChange = (index, tmp_index) => {
               </span>
             </label>
             <Select
+              components={{DropdownIndicator: CustomDropdownIndicator, ClearIndicator: CustomClearIndicator}}
               value={formData.orderType}
               onChange={(value) => handleInputChange("orderType", value)}
               options={orderType}
               id="orderType"
               name="orderType"
               required
+              isDisabled={isFormSaved}
+              isClearable
             />
           </div>
           <div className="col-md col-12 mb-md-0 mt-2">
@@ -214,6 +223,7 @@ const handleCheckboxChange = (index, tmp_index) => {
               value={formData.orderNumber}
               onChange={(e) => handleInputChange("orderNumber", e.target.value)}
               required
+              disabled={isFormSaved}
             />
           </div>
           <div className="col-md col-12 mb-md-0 mt-2">
@@ -230,6 +240,7 @@ const handleCheckboxChange = (index, tmp_index) => {
               }
               required
               placeholderText="Received On"
+              disabled={isFormSaved}
             />
           </div>
         </div>
@@ -253,6 +264,7 @@ const handleCheckboxChange = (index, tmp_index) => {
                   handleInputChange("receiverName", e.target.value)
                 }
                 required
+                disabled={isFormSaved}
               />
             </div>
           </div>
@@ -268,6 +280,7 @@ const handleCheckboxChange = (index, tmp_index) => {
                 handleInputChange("receiverEmail", e.target.value)
               }
               required
+              disabled={isFormSaved}
             />
           </div>
           <div className="col-md col-12 mb-md-0 mb-2">
@@ -284,6 +297,7 @@ const handleCheckboxChange = (index, tmp_index) => {
               }
               required
               placeholderText="Start Date"
+              disabled={isFormSaved}
             />
           </div>
           <div className="col-md col-12 mb-md-0 mb-2">
@@ -301,6 +315,7 @@ const handleCheckboxChange = (index, tmp_index) => {
               minDate={dates.startDate}
               placeholderText="End Date"
               required
+              disabled={isFormSaved}
             />
           </div>
           <div className="col-md col-12 mb-md-0 mb-2">
@@ -323,6 +338,7 @@ const handleCheckboxChange = (index, tmp_index) => {
               id="budget"
               name="budget"
               required
+              disabled={isFormSaved}
             />
           </div>
           <div className="col-md col-12">
@@ -333,10 +349,13 @@ const handleCheckboxChange = (index, tmp_index) => {
               </span>
             </label>
             <Select
+              components={{DropdownIndicator: CustomDropdownIndicator, ClearIndicator: CustomClearIndicator}}
               value={selectedOption.currencies}
               onChange={(value) => handleSelectChange("currencies", value)}
               options={currencies}
               required
+              isDisabled={isFormSaved}
+              isClearable
             />
           </div>
         </div>
@@ -370,6 +389,7 @@ const handleCheckboxChange = (index, tmp_index) => {
                       </span>
                     </label>
                     <Select
+                      components={{DropdownIndicator: CustomDropdownIndicator, ClearIndicator: CustomClearIndicator}}
                       defaultValue={talent.jobTitle}
                       onChange={(value) =>
                         handleSelectChange("jobTitle", value, index)
@@ -378,6 +398,8 @@ const handleCheckboxChange = (index, tmp_index) => {
                       id="jobTitle"
                       name="jobTitle"
                       required
+                      isDisabled={isFormSaved}
+                      isClearable
                     />
                   </div>
                   <div className="col-md-6 col-12 p-remove" style={{ paddingLeft: 12 }}>
@@ -398,7 +420,7 @@ const handleCheckboxChange = (index, tmp_index) => {
                       name="jobId"
                       value={talent.jobId}
                       readOnly
-                      
+                      disabled={isFormSaved}
                     />
                   </div>
                 </div>
@@ -426,6 +448,7 @@ const handleCheckboxChange = (index, tmp_index) => {
                         width: 18,
                         height: 18,
                         cursor: "pointer",
+                        
                       }}
                     />
                     <span
@@ -458,6 +481,7 @@ const handleCheckboxChange = (index, tmp_index) => {
                           id={`contractDuration_${index}_${tmp_index}`}
                           name="contractDuration"
                           value={talent.talentDetails[tmp_index].contractDuration || ""}
+                          disabled={isFormSaved}
                           onChange={(e) =>
                             handleTalentChange(
                               "contractDuration",
@@ -491,6 +515,7 @@ const handleCheckboxChange = (index, tmp_index) => {
                           id={`billRate_${index}_${tmp_index}`}
                           name="billRate"
                           value={talent.talentDetails[tmp_index].billRate || ""}
+                          disabled={isFormSaved}
                           onChange={(e) =>
                             handleTalentChange(
                               "billRate",
@@ -515,11 +540,14 @@ const handleCheckboxChange = (index, tmp_index) => {
                           Currency
                         </label>
                         <Select
+                          components={{DropdownIndicator: CustomDropdownIndicator, ClearIndicator: CustomClearIndicator}}
                           defaultValue={talent.talentDetails[tmp_index].currency || ""}
                           onChange={(value) =>
                             handleTalentChange("currencies", value, index)
                           }
                           options={currencies}
+                          isDisabled={isFormSaved}
+                          isClearable
                         />
                       </div>
                     </div>
@@ -546,6 +574,7 @@ const handleCheckboxChange = (index, tmp_index) => {
                               tmp_index
                             )
                           }
+                          disabled={isFormSaved}
                           onInput={(e) =>
                             (e.target.value = e.target.value.replace(
                               /[^0-9]/g,
@@ -562,11 +591,14 @@ const handleCheckboxChange = (index, tmp_index) => {
                           Currency
                         </label>
                         <Select
+                          components={{DropdownIndicator: CustomDropdownIndicator, ClearIndicator: CustomClearIndicator}}
                           defaultValue={talent.talentDetails[tmp_index].currency || ""}
                           onChange={(value) =>
                             handleTalentChange("currencies", value, index)
                           }
                           options={currencies}
+                          isDisabled={isFormSaved}
+                          isClearable
                         />
                       </div>
                       <div
@@ -591,6 +623,7 @@ const handleCheckboxChange = (index, tmp_index) => {
                               tmp_index
                             )
                           }
+                          disabled={isFormSaved}
                           onInput={(e) =>
                             (e.target.value = e.target.value.replace(
                               /[^0-9]/g,
@@ -607,11 +640,14 @@ const handleCheckboxChange = (index, tmp_index) => {
                           Currency
                         </label>
                         <Select
+                          components={{DropdownIndicator: CustomDropdownIndicator, ClearIndicator: CustomClearIndicator}}
                           defaultValue={talent.talentDetails[tmp_index].currency || ""}
                           onChange={(value) =>
                             handleTalentChange("currencies", value, index)
                           }
                           options={currencies}
+                          isDisabled={isFormSaved}
+                          isClearable
                         />
                       </div>
                     </div>
