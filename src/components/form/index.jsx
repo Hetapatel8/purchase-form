@@ -132,22 +132,8 @@ const handleCheckboxChange = (index, tmp_index) => {
     setJobOptions([]);
   };
 
-  const handleSave = () => {
-    if (
-      !selectedOption.clientNames ||
-      !formData.orderType ||
-      !formData.orderNumber ||
-      !dates.receivedDate ||
-      !formData.receiverName ||
-      !formData.receiverEmail ||
-      !dates.startDate ||
-      !dates.endDate ||
-      !formData.budget ||
-      !selectedOption.currencies
-    ) {
-      alert("Please fill all the required fields.");
-      return;
-    }
+  const handleSave = (e) => {
+
     const checkedTalents = talentDetails.map((talent, index) => {
       const checkedTalentDetails = talent.talents.filter((tmp_talent, tmp_index) => {
         return isCheckedArray[index * talentDetails[0].talents.length + tmp_index] !== undefined;
@@ -174,6 +160,7 @@ const handleCheckboxChange = (index, tmp_index) => {
       dates,
       talentDetails: checkedTalents,
     };
+    e.preventDefault();
     console.log('Form Data', fullData)
     localStorage.setItem('formData', JSON.stringify(fullData));
     alert("Form saved successfully!");
@@ -182,7 +169,7 @@ const handleCheckboxChange = (index, tmp_index) => {
   
 
   return (
-    <form className="purchase_order_form px-md-4 px-3">
+    <form className="purchase_order_form px-md-4 px-3" onSubmit={handleSave}> 
       <div className="purchase_details_section">
         <div className="row">
           <div className="col-xl col-md-6 mb-xl-0 mb-md-3 mt-2">
@@ -308,9 +295,17 @@ const handleCheckboxChange = (index, tmp_index) => {
             </label>
             <DatePicker
               selected={dates.startDate}
-              onChange={(date) =>
-                setDates((prev) => ({ ...prev, startDate: date }))
-              }
+              onChange={(date) => {
+                setDates((prev) => {
+                  // Check if the end date is earlier than the new start date
+                  const isEndDateInvalid = prev.endDate && date > prev.endDate;
+                  return {
+                    ...prev,
+                    startDate: date,
+                    endDate: isEndDateInvalid ? null : prev.endDate, // Reset end date if invalid
+                  };
+                });
+              }}
               required
               placeholderText="Start Date"
               disabled={isFormSaved}
@@ -682,17 +677,18 @@ const handleCheckboxChange = (index, tmp_index) => {
         >
           Reset
         </div>
-        <div
+        <button
           className="pt-1 pb-2 px-3 d-flex justify-content-center align-items-center fs-6 fw-medium rounded-pill lh-base"
           style={{
             cursor: "pointer",
             background: "#e8e8e8",
             color: "#898989",
           }}
-          onClick={handleSave}
+          type="submit"
+          
         >
           Save
-        </div>
+        </button>
       </div>
     </form>
   );
