@@ -5,6 +5,7 @@ import { clientData, currencies, orderType } from "../../utils/formData";
 import "react-datepicker/dist/react-datepicker.css";
 import CustomDropdownIndicator from "../CustomDropdownIndicator";
 import CustomClearIndicator from "../CustomClearIndicator";
+import PurchaseDetailsSection from "../PurchaseDetailsSection";
 
 const PurchaseForm = () => {
   const initialTalentDetail = {
@@ -35,11 +36,6 @@ const PurchaseForm = () => {
 
   const [jobOptions, setJobOptions] = useState([]);
   const [talentDetails, setTalentDetails] = useState([initialTalentDetail]);
-
-  const clientNames = clientData.map((client) => ({
-    value: client.id,
-    label: client.clientName.label,
-  }));
 
   const [isCheckedArray, setIsCheckedArray] = useState([]);
   const [isFormSaved, setIsFormSaved] = useState(false);
@@ -201,624 +197,399 @@ const PurchaseForm = () => {
 
   return (
     <form className="purchase_order_form px-md-4 px-3" onSubmit={handleSave}>
-      <div className="purchase_details_section">
-        <div className="row">
-          <div className="col-xl col-md-6 mb-xl-0 mb-md-3 mt-2">
-            <label htmlFor="clientName" className="mb-1 fw-medium">
-              Client Name{" "}
-              <span className="fs-6 fw-bold ms-1" style={{ color: "red" }}>
-                *
-              </span>
-            </label>
-            <Select
-              components={{
-                DropdownIndicator: CustomDropdownIndicator,
-                ClearIndicator: CustomClearIndicator,
-              }}
-              value={selectedOption.clientNames}
-              onChange={(value) => handleSelectChange("clientNames", value)}
-              options={clientNames}
-              id="clientName"
-              name="clientName"
-              required
-              isDisabled={isFormSaved}
-              isClearable
-            />
-          </div>
-          <div className="col-xl col-md-6 mb-xl-0 mb-md-3 mt-2">
-            <label htmlFor="orderType" className="mb-1 fw-medium">
-              Purchase Order Type
-              <span className="fs-6 fw-bold ms-1" style={{ color: "red" }}>
-                *
-              </span>
-            </label>
-            <Select
-              components={{
-                DropdownIndicator: CustomDropdownIndicator,
-                ClearIndicator: CustomClearIndicator,
-              }}
-              value={formData.orderType}
-              onChange={(value) => handleInputChange("orderType", value)}
-              options={orderType}
-              id="orderType"
-              name="orderType"
-              required
-              isDisabled={isFormSaved}
-              isClearable
-            />
-          </div>
-          <div className="col-md col-12 mb-md-0 mt-2">
-            <label htmlFor="orderNumber" className="mb-1 fw-medium">
-              Purchase Order No.
-              <span className="fs-6 fw-bold ms-1" style={{ color: "red" }}>
-                *
-              </span>
-            </label>
-            <input
-              className="d-block col-12 "
-              placeholder="PO Number"
-              type="text"
-              id="orderNumber"
-              name="orderNumber"
-              value={formData.orderNumber}
-              onChange={(e) => handleInputChange("orderNumber", e.target.value)}
-              required
-              disabled={isFormSaved}
-            />
-          </div>
-          <div className="col-md col-12 mb-md-0 mt-2">
-            <label htmlFor="ReceivedOn" className="mb-1 d-block fw-medium">
-              Received On
-              <span className="fs-6 fw-bold ms-1" style={{ color: "red" }}>
-                *
-              </span>
-            </label>
-            <DatePicker
-              selected={dates.receivedDate}
-              onChange={(date) =>
-                setDates((prev) => ({ ...prev, receivedDate: date }))
-              }
-              id="ReceivedOn"
-              required
-              placeholderText="Received On"
-              disabled={isFormSaved}
-            />
-          </div>
-        </div>
-        <div className="row mt-xxl-4 mt-md-3 mt-2 align-items-end ">
-          <div className="col-xxl col-md-6 mb-xxl-0 mb-3">
-            <div>
-              <label htmlFor="ReceiverName" className="mb-1 fw-medium">
-                Received From
-                <span className="fs-6 fw-bold ms-1" style={{ color: "red" }}>
-                  *
-                </span>
-              </label>
-              <input
-                className="d-block col-12 "
-                placeholder="Received From Name"
-                type="text"
-                id="ReceiverName"
-                name="ReceiverName"
-                value={formData.receiverName}
-                onChange={(e) =>
-                  handleInputChange("receiverName", e.target.value)
-                }
-                required
-                disabled={isFormSaved}
-              />
+      <PurchaseDetailsSection
+        formData={formData}
+        selectedOption={selectedOption}
+        dates={dates}
+        handleInputChange={handleInputChange}
+        handleSelectChange={handleSelectChange}
+        isFormSaved={isFormSaved}
+        setDates={setDates}
+      />
+      <div className=" mt-xxl-4 mt-3">
+        <div className="d-flex justify-content-between align-items-center">
+          <h5 className="fs-5 lh-base fw-medium mb-0 text-black py-1">
+            Talent Detail
+          </h5>
+          {formData.orderType?.value === "Group PO" && (
+            <div
+              className="pt-1 pb-md-2 pb-1 px-md-3 px-2 d-flex justify-content-between align-items-center border border-dark fs-6 fw-medium rounded-pill lh-base"
+              style={{ cursor: "pointer" }}
+              onClick={addAnotherTalentSection}
+            >
+              + Add Another
             </div>
-          </div>
-          <div className="col-xxl col-md-6 mb-xxl-0 mb-md-3 mb-2">
-            <input
-              className="d-block col-12 "
-              placeholder="Received From Email ID"
-              type="email"
-              id="ReceiverEmail"
-              name="ReceiverEmail"
-              value={formData.receiverEmail}
-              onChange={(e) =>
-                handleInputChange("receiverEmail", e.target.value)
-              }
-              required
-              disabled={isFormSaved}
-            />
-          </div>
-          <div className="col-md col-12 mb-md-0 mb-2">
-            <label htmlFor="startDate" className="mb-1 d-block fw-medium">
-              PO Start Date
-              <span className="fs-6 fw-bold ms-1" style={{ color: "red" }}>
-                *
-              </span>
-            </label>
-            <DatePicker
-              selected={dates.startDate}
-              onChange={(date) => {
-                setDates((prev) => {
-                  const isEndDateInvalid = prev.endDate && date > prev.endDate;
-                  return {
-                    ...prev,
-                    startDate: date,
-                    endDate: isEndDateInvalid ? null : prev.endDate,
-                  };
-                });
-              }}
-              id="startDate"
-              required
-              placeholderText="Start Date"
-              disabled={isFormSaved}
-            />
-          </div>
-          <div className="col-md col-12 mb-md-0 mb-2">
-            <label htmlFor="endDate" className="mb-1 d-block fw-medium">
-              PO End Date
-              <span className="fs-6 fw-bold ms-1" style={{ color: "red" }}>
-                *
-              </span>
-            </label>
-            <DatePicker
-              selected={dates.endDate}
-              onChange={(date) =>
-                setDates((prev) => ({ ...prev, endDate: date }))
-              }
-              id="endDate"
-              minDate={dates.startDate}
-              placeholderText="End Date"
-              required
-              disabled={isFormSaved}
-            />
-          </div>
-          <div className="col-md col-12 mb-md-0 mb-2">
-            <label htmlFor="budget" className="mb-1 fw-medium ">
-              Budget
-              <span className="fs-6 fw-bold ms-1" style={{ color: "red" }}>
-                *
-              </span>
-            </label>
-            <input
-              className="d-block col-12 "
-              placeholder="Budget"
-              maxLength={5}
-              onInput={(e) =>
-                (e.target.value = e.target.value.replace(/[^0-9]/g, ""))
-              }
-              value={formData.budget}
-              onChange={(e) => handleInputChange("budget", e.target.value)}
-              type="text"
-              id="budget"
-              name="budget"
-              required
-              disabled={isFormSaved}
-            />
-          </div>
-          <div className="col-md col-12">
-            <label className="mb-1 fw-medium">
-              Currency
-              <span className="fs-6 fw-bold ms-1" style={{ color: "red" }}>
-                *
-              </span>
-            </label>
-            <Select
-              components={{
-                DropdownIndicator: CustomDropdownIndicator,
-                ClearIndicator: CustomClearIndicator,
-              }}
-              value={selectedOption.currencies}
-              onChange={(value) => handleSelectChange("currencies", value)}
-              options={currencies}
-              required
-              isDisabled={isFormSaved}
-              isClearable
-            />
-          </div>
+          )}
         </div>
-        <div className=" mt-xxl-4 mt-3">
-          <div className="d-flex justify-content-between align-items-center">
-            <h5 className="fs-5 lh-base fw-medium mb-0 text-black py-1">
-              Talent Detail
-            </h5>
-            {formData.orderType?.value === "Group PO" && (
+        <div className="accordion" id="accordionExample">
+          {talentDetails.length > 0 &&
+            talentDetails.map((talent, index) => (
               <div
-                className="pt-1 pb-md-2 pb-1 px-md-3 px-2 d-flex justify-content-between align-items-center border border-dark fs-6 fw-medium rounded-pill lh-base"
-                style={{ cursor: "pointer" }}
-                onClick={addAnotherTalentSection}
+                className="talent_detail_section mb-5 accordion-item border-0"
+                key={index}
               >
-                + Add Another
-              </div>
-            )}
-          </div>
-          <div className="accordion" id="accordionExample">
-            {talentDetails.length > 0 &&
-              talentDetails.map((talent, index) => (
                 <div
-                  className="talent_detail_section mb-5 accordion-item border-0"
-                  key={index}
+                  className="row  mt-xxl-4 mt-3 accordion-header position-relative"
+                  id={`heading${index}`}
                 >
-                  <div
-                    className="row  mt-xxl-4 mt-3 accordion-header position-relative"
-                    id={`heading${index}`}
-                  >
-                    <div className="col-xl-6 col-12 flex-md-row flex-column d-flex mb-3">
-                      <div
-                        className="col-md-6 col-12 p-remove mb-md-0 mb-2"
-                        style={{ paddingRight: 12 }}
-                      >
-                        <label htmlFor="jobTitle" className="mb-1 fw-medium">
-                          JOB Title/REQ Name{" "}
-                          <span
-                            className="fs-6 fw-bold ms-1"
-                            style={{ color: "red" }}
-                          >
-                            *
-                          </span>
-                        </label>
-                        <Select
-                          components={{
-                            DropdownIndicator: CustomDropdownIndicator,
-                            ClearIndicator: CustomClearIndicator,
-                          }}
-                          defaultValue={talent.jobTitle}
-                          onChange={(value) =>
-                            handleSelectChange("jobTitle", value, index)
-                          }
-                          options={jobOptions}
-                          id="jobTitle"
-                          name="jobTitle"
-                          required
-                          isDisabled={isFormSaved}
-                          isClearable
-                        />
-                      </div>
-                      <div
-                        className="col-md-6 col-12 p-remove"
-                        style={{ paddingLeft: 12 }}
-                      >
-                        <label htmlFor="jobId" className="mb-1 fw-medium">
-                          JOB ID/REQ ID{" "}
-                          <span
-                            className="fs-6 fw-bold ms-1"
-                            style={{ color: "red" }}
-                          >
-                            *
-                          </span>
-                        </label>
-                        <input
-                          className="d-block col-12 "
-                          placeholder="JOB ID/REQ ID"
-                          type="text"
-                          id="jobId"
-                          name="jobId"
-                          value={talent.jobId}
-                          readOnly
-                          disabled={isFormSaved}
-                        />
-                      </div>
-                      {/* <div onClick={deleteTalentSection(index)}>delete</div> */}
-                      <button
-                        type="button"
-                        className="shadow-none bg-transparent p-0 position-absolute accordion-button collapsed"
-                        data-bs-toggle="collapse"
-                        data-bs-target={`#collapse${index}`}
-                        aria-expanded="false"
-                        aria-controls={`collapse${index}`}
-                        style={{ right: 12, width: 20, height: 20 }}
-                      ></button>
+                  <div className="col-xl-6 col-12 flex-md-row flex-column d-flex mb-3">
+                    <div
+                      className="col-md-6 col-12 p-remove mb-md-0 mb-2"
+                      style={{ paddingRight: 12 }}
+                    >
+                      <label htmlFor="jobTitle" className="mb-1 fw-medium">
+                        JOB Title/REQ Name{" "}
+                        <span
+                          className="fs-6 fw-bold ms-1"
+                          style={{ color: "red" }}
+                        >
+                          *
+                        </span>
+                      </label>
+                      <Select
+                        components={{
+                          DropdownIndicator: CustomDropdownIndicator,
+                          ClearIndicator: CustomClearIndicator,
+                        }}
+                        defaultValue={talent.jobTitle}
+                        onChange={(value) =>
+                          handleSelectChange("jobTitle", value, index)
+                        }
+                        options={jobOptions}
+                        id="jobTitle"
+                        name="jobTitle"
+                        required
+                        isDisabled={isFormSaved}
+                        isClearable
+                      />
                     </div>
+                    <div
+                      className="col-md-6 col-12 p-remove"
+                      style={{ paddingLeft: 12 }}
+                    >
+                      <label htmlFor="jobId" className="mb-1 fw-medium">
+                        JOB ID/REQ ID{" "}
+                        <span
+                          className="fs-6 fw-bold ms-1"
+                          style={{ color: "red" }}
+                        >
+                          *
+                        </span>
+                      </label>
+                      <input
+                        className="d-block col-12 "
+                        placeholder="JOB ID/REQ ID"
+                        type="text"
+                        id="jobId"
+                        name="jobId"
+                        value={talent.jobId}
+                        readOnly
+                        disabled={isFormSaved}
+                      />
+                    </div>
+                    {/* <div onClick={deleteTalentSection(index)}>delete</div> */}
+                    <button
+                      type="button"
+                      className="shadow-none bg-transparent p-0 position-absolute accordion-button collapsed"
+                      data-bs-toggle="collapse"
+                      data-bs-target={`#collapse${index}`}
+                      aria-expanded="false"
+                      aria-controls={`collapse${index}`}
+                      style={{ right: 12, width: 20, height: 20 }}
+                    ></button>
                   </div>
+                </div>
 
-                  <div
-                    className=""
-                    style={{
-                      background: "rgb(204, 204, 204)",
-                      height: 1,
-                      marginInline: "-24px",
-                    }}
-                  ></div>
-                  <div
-                    id={`collapse${index}`}
-                    className={`accordion-collapse collapse`}
-                    aria-labelledby={`heading${index}`}
-                    data-bs-parent="#accordionExample"
-                  >
-                    <div className="accordion-body p-0">
-                      {talent.talents.map((tmp_talent, tmp_index) => (
-                        <div className="row mt-3" key={`${index}-${tmp_index}`}>
-                          <label className="d-flex align-items-center position-relative talentCheckbox">
-                            <input
-                              className="position-absolute opacity-0 border-0 checkbox_input"
-                              type="checkbox"
-                              value=""
-                              id={`talentCheckbox_${tmp_index}`}
-                              checked={
-                                isCheckedArray[
-                                  index * talentDetails[0].talents.length +
+                <div
+                  className=""
+                  style={{
+                    background: "rgb(204, 204, 204)",
+                    height: 1,
+                    marginInline: "-24px",
+                  }}
+                ></div>
+                <div
+                  id={`collapse${index}`}
+                  className={`accordion-collapse collapse`}
+                  aria-labelledby={`heading${index}`}
+                  data-bs-parent="#accordionExample"
+                >
+                  <div className="accordion-body p-0">
+                    {talent.talents.map((tmp_talent, tmp_index) => (
+                      <div className="row mt-3" key={`${index}-${tmp_index}`}>
+                        <label className="d-flex align-items-center position-relative talentCheckbox">
+                          <input
+                            className="position-absolute opacity-0 border-0 checkbox_input"
+                            type="checkbox"
+                            value=""
+                            id={`talentCheckbox_${tmp_index}`}
+                            checked={
+                              isCheckedArray[
+                                index * talentDetails[0].talents.length +
+                                  tmp_index
+                              ] !== undefined
+                                ? isCheckedArray[
+                                    index * talentDetails[0].talents.length +
+                                      tmp_index
+                                  ]
+                                : false
+                            }
+                            onChange={() =>
+                              handleCheckboxChange(index, tmp_index)
+                            }
+                            style={{
+                              width: 18,
+                              height: 18,
+                              cursor: "pointer",
+                            }}
+                          />
+                          <span
+                            className="d-inline-flex align-items-center justify-content-center align-top rounded-1 gx-3 checkbox_control"
+                            aria-hidden="true"
+                            id=""
+                            style={{
+                              width: 18,
+                              height: 18,
+                              userSelect: "none",
+                            }}
+                          ></span>
+                          <span className="fw-medium fs-6 ms-2 text-black">
+                            {tmp_talent}
+                          </span>
+                        </label>
+                        <div className="row mt-3 px-0 mx-0">
+                          <div className="col-xxl-6 col-12 flex-md-row flex-column d-flex pe-xxl-0">
+                            <div
+                              className="col-xxl-6 col-md-4 col-12 mb-md-0 mb-2 position-relative p-remove"
+                              style={{ paddingRight: 12 }}
+                            >
+                              <label
+                                htmlFor={`contractDuration_${index}_${tmp_index}`}
+                                className="mb-1 fw-medium"
+                              >
+                                Contract Duration
+                              </label>
+                              <input
+                                className="d-block col-12 "
+                                placeholder="Contract Duration"
+                                type="text"
+                                id={`contractDuration_${index}_${tmp_index}`}
+                                name="contractDuration"
+                                value={
+                                  talent.talentDetails[tmp_index]
+                                    .contractDuration || ""
+                                }
+                                disabled={isFormSaved}
+                                onChange={(e) =>
+                                  handleTalentChange(
+                                    "contractDuration",
+                                    e.target.value,
+                                    index,
                                     tmp_index
-                                ] !== undefined
-                                  ? isCheckedArray[
-                                      index * talentDetails[0].talents.length +
-                                        tmp_index
-                                    ]
-                                  : false
-                              }
-                              onChange={() =>
-                                handleCheckboxChange(index, tmp_index)
-                              }
-                              style={{
-                                width: 18,
-                                height: 18,
-                                cursor: "pointer",
-                              }}
-                            />
-                            <span
-                              className="d-inline-flex align-items-center justify-content-center align-top rounded-1 gx-3 checkbox_control"
-                              aria-hidden="true"
-                              id=""
-                              style={{
-                                width: 18,
-                                height: 18,
-                                userSelect: "none",
-                              }}
-                            ></span>
-                            <span className="fw-medium fs-6 ms-2 text-black">
-                              {tmp_talent}
-                            </span>
-                          </label>
-                          <div className="row mt-3 px-0 mx-0">
-                            <div className="col-xxl-6 col-12 flex-md-row flex-column d-flex pe-xxl-0">
-                              <div
-                                className="col-xxl-6 col-md-4 col-12 mb-md-0 mb-2 position-relative p-remove"
-                                style={{ paddingRight: 12 }}
-                              >
-                                <label
-                                  htmlFor={`contractDuration_${index}_${tmp_index}`}
-                                  className="mb-1 fw-medium"
-                                >
-                                  Contract Duration
-                                </label>
-                                <input
-                                  className="d-block col-12 "
-                                  placeholder="Contract Duration"
-                                  type="text"
-                                  id={`contractDuration_${index}_${tmp_index}`}
-                                  name="contractDuration"
-                                  value={
-                                    talent.talentDetails[tmp_index]
-                                      .contractDuration || ""
-                                  }
-                                  disabled={isFormSaved}
-                                  onChange={(e) =>
-                                    handleTalentChange(
-                                      "contractDuration",
-                                      e.target.value,
-                                      index,
-                                      tmp_index
-                                    )
-                                  }
-                                  onInput={(e) =>
-                                    (e.target.value = e.target.value.replace(
-                                      /[^0-9]/g,
-                                      ""
-                                    ))
-                                  }
-                                />
-                                <span className="placeholder-right-text fw-medium position-absolute">
-                                  Months
-                                </span>
-                              </div>
-                              <div
-                                className="col-xxl-3 col-md-4 mb-md-0 mb-2 position-relative p-remove"
-                                style={{ paddingRight: 12 }}
-                              >
-                                <label
-                                  htmlFor={`billRate_${index}_${tmp_index}`}
-                                  className="mb-1 fw-medium"
-                                >
-                                  Bill Rate
-                                </label>
-                                <input
-                                  className="d-block col-12 "
-                                  placeholder="Bill Rate"
-                                  type="text"
-                                  id={`billRate_${index}_${tmp_index}`}
-                                  name="billRate"
-                                  value={
-                                    talent.talentDetails[tmp_index].billRate ||
+                                  )
+                                }
+                                onInput={(e) =>
+                                  (e.target.value = e.target.value.replace(
+                                    /[^0-9]/g,
                                     ""
-                                  }
-                                  disabled={isFormSaved}
-                                  onChange={(e) =>
-                                    handleTalentChange(
-                                      "billRate",
-                                      e.target.value,
-                                      index,
-                                      tmp_index
-                                    )
-                                  }
-                                  onInput={(e) =>
-                                    (e.target.value = e.target.value.replace(
-                                      /[^0-9]/g,
-                                      ""
-                                    ))
-                                  }
-                                />
-                                <span className="placeholder-right-text fw-medium position-absolute">
-                                  /hr
-                                </span>
-                              </div>
-                              <div
-                                className="col-xxl-3 col-md-4 p-remove"
-                                style={{ paddingRight: 12 }}
-                              >
-                                <label className="mb-1 fw-medium">
-                                  Currency
-                                </label>
-                                <Select
-                                  components={{
-                                    DropdownIndicator: CustomDropdownIndicator,
-                                    ClearIndicator: CustomClearIndicator,
-                                  }}
-                                  defaultValue={
-                                    talent.talentDetails[tmp_index].currency ||
-                                    ""
-                                  }
-                                  onChange={(value) =>
-                                    handleTalentChange(
-                                      "currencies",
-                                      value,
-                                      index
-                                    )
-                                  }
-                                  options={currencies}
-                                  isDisabled={isFormSaved}
-                                  isClearable
-                                />
-                              </div>
+                                  ))
+                                }
+                              />
+                              <span className="placeholder-right-text fw-medium position-absolute">
+                                Months
+                              </span>
                             </div>
-                            <div className="col-xxl-6 col-12 flex-md-row flex-column d-flex ps-xxl-0 mt-xxl-0 mt-3">
-                              <div
-                                className="col-md-3 col-12 position-relative mb-md-0 mb-2 p-remove"
-                                style={{ paddingRight: 12 }}
+                            <div
+                              className="col-xxl-3 col-md-4 mb-md-0 mb-2 position-relative p-remove"
+                              style={{ paddingRight: 12 }}
+                            >
+                              <label
+                                htmlFor={`billRate_${index}_${tmp_index}`}
+                                className="mb-1 fw-medium"
                               >
-                                <label
-                                  htmlFor={`standardTime_${index}_${tmp_index}`}
-                                  className="mb-1 fw-medium"
-                                >
-                                  Standard Time BR
-                                </label>
-                                <input
-                                  className="d-block col-12 "
-                                  placeholder="Standard Time BR"
-                                  type="text"
-                                  id={`standardTime_${index}_${tmp_index}`}
-                                  name="standardTime"
-                                  value={
-                                    talent.talentDetails[tmp_index]
-                                      .standardTime || ""
-                                  }
-                                  onChange={(e) =>
-                                    handleTalentChange(
-                                      "standardTime",
-                                      e.target.value,
-                                      index,
-                                      tmp_index
-                                    )
-                                  }
-                                  disabled={isFormSaved}
-                                  onInput={(e) =>
-                                    (e.target.value = e.target.value.replace(
-                                      /[^0-9]/g,
-                                      ""
-                                    ))
-                                  }
-                                />
-                                <span className="placeholder-right-text fw-medium position-absolute">
-                                  /hr
-                                </span>
-                              </div>
-                              <div
-                                className="col-md-3 col-12 position-relative mb-md-0 mb-2 p-remove"
-                                style={{ paddingRight: 12 }}
+                                Bill Rate
+                              </label>
+                              <input
+                                className="d-block col-12 "
+                                placeholder="Bill Rate"
+                                type="text"
+                                id={`billRate_${index}_${tmp_index}`}
+                                name="billRate"
+                                value={
+                                  talent.talentDetails[tmp_index].billRate || ""
+                                }
+                                disabled={isFormSaved}
+                                onChange={(e) =>
+                                  handleTalentChange(
+                                    "billRate",
+                                    e.target.value,
+                                    index,
+                                    tmp_index
+                                  )
+                                }
+                                onInput={(e) =>
+                                  (e.target.value = e.target.value.replace(
+                                    /[^0-9]/g,
+                                    ""
+                                  ))
+                                }
+                              />
+                              <span className="placeholder-right-text fw-medium position-absolute">
+                                /hr
+                              </span>
+                            </div>
+                            <div
+                              className="col-xxl-3 col-md-4 p-remove"
+                              style={{ paddingRight: 12 }}
+                            >
+                              <label className="mb-1 fw-medium">Currency</label>
+                              <Select
+                                components={{
+                                  DropdownIndicator: CustomDropdownIndicator,
+                                  ClearIndicator: CustomClearIndicator,
+                                }}
+                                defaultValue={
+                                  talent.talentDetails[tmp_index].currency || ""
+                                }
+                                onChange={(value) =>
+                                  handleTalentChange("currencies", value, index)
+                                }
+                                options={currencies}
+                                isDisabled={isFormSaved}
+                                isClearable
+                              />
+                            </div>
+                          </div>
+                          <div className="col-xxl-6 col-12 flex-md-row flex-column d-flex ps-xxl-0 mt-xxl-0 mt-3">
+                            <div
+                              className="col-md-3 col-12 position-relative mb-md-0 mb-2 p-remove"
+                              style={{ paddingRight: 12 }}
+                            >
+                              <label
+                                htmlFor={`standardTime_${index}_${tmp_index}`}
+                                className="mb-1 fw-medium"
                               >
-                                <label className="mb-1 fw-medium">
-                                  Currency
-                                </label>
-                                <Select
-                                  components={{
-                                    DropdownIndicator: CustomDropdownIndicator,
-                                    ClearIndicator: CustomClearIndicator,
-                                  }}
-                                  defaultValue={
-                                    talent.talentDetails[tmp_index].currency ||
+                                Standard Time BR
+                              </label>
+                              <input
+                                className="d-block col-12 "
+                                placeholder="Standard Time BR"
+                                type="text"
+                                id={`standardTime_${index}_${tmp_index}`}
+                                name="standardTime"
+                                value={
+                                  talent.talentDetails[tmp_index]
+                                    .standardTime || ""
+                                }
+                                onChange={(e) =>
+                                  handleTalentChange(
+                                    "standardTime",
+                                    e.target.value,
+                                    index,
+                                    tmp_index
+                                  )
+                                }
+                                disabled={isFormSaved}
+                                onInput={(e) =>
+                                  (e.target.value = e.target.value.replace(
+                                    /[^0-9]/g,
                                     ""
-                                  }
-                                  onChange={(value) =>
-                                    handleTalentChange(
-                                      "currencies",
-                                      value,
-                                      index
-                                    )
-                                  }
-                                  options={currencies}
-                                  isDisabled={isFormSaved}
-                                  isClearable
-                                />
-                              </div>
-                              <div
-                                className="col-md-3 col-12 position-relative mb-md-0 mb-2 p-remove"
-                                style={{ paddingRight: 12 }}
+                                  ))
+                                }
+                              />
+                              <span className="placeholder-right-text fw-medium position-absolute">
+                                /hr
+                              </span>
+                            </div>
+                            <div
+                              className="col-md-3 col-12 position-relative mb-md-0 mb-2 p-remove"
+                              style={{ paddingRight: 12 }}
+                            >
+                              <label className="mb-1 fw-medium">Currency</label>
+                              <Select
+                                components={{
+                                  DropdownIndicator: CustomDropdownIndicator,
+                                  ClearIndicator: CustomClearIndicator,
+                                }}
+                                defaultValue={
+                                  talent.talentDetails[tmp_index].currency || ""
+                                }
+                                onChange={(value) =>
+                                  handleTalentChange("currencies", value, index)
+                                }
+                                options={currencies}
+                                isDisabled={isFormSaved}
+                                isClearable
+                              />
+                            </div>
+                            <div
+                              className="col-md-3 col-12 position-relative mb-md-0 mb-2 p-remove"
+                              style={{ paddingRight: 12 }}
+                            >
+                              <label
+                                htmlFor={`overTime_${index}_${tmp_index}`}
+                                className="mb-1 fw-medium"
                               >
-                                <label
-                                  htmlFor={`overTime_${index}_${tmp_index}`}
-                                  className="mb-1 fw-medium"
-                                >
-                                  Over Time BR
-                                </label>
-                                <input
-                                  className="d-block col-12 "
-                                  placeholder="Over Time BR"
-                                  type="text"
-                                  id={`overTime_${index}_${tmp_index}`}
-                                  name="overTime"
-                                  value={
-                                    talent.talentDetails[tmp_index].overTime ||
+                                Over Time BR
+                              </label>
+                              <input
+                                className="d-block col-12 "
+                                placeholder="Over Time BR"
+                                type="text"
+                                id={`overTime_${index}_${tmp_index}`}
+                                name="overTime"
+                                value={
+                                  talent.talentDetails[tmp_index].overTime || ""
+                                }
+                                onChange={(e) =>
+                                  handleTalentChange(
+                                    "overTime",
+                                    e.target.value,
+                                    index,
+                                    tmp_index
+                                  )
+                                }
+                                disabled={isFormSaved}
+                                onInput={(e) =>
+                                  (e.target.value = e.target.value.replace(
+                                    /[^0-9]/g,
                                     ""
-                                  }
-                                  onChange={(e) =>
-                                    handleTalentChange(
-                                      "overTime",
-                                      e.target.value,
-                                      index,
-                                      tmp_index
-                                    )
-                                  }
-                                  disabled={isFormSaved}
-                                  onInput={(e) =>
-                                    (e.target.value = e.target.value.replace(
-                                      /[^0-9]/g,
-                                      ""
-                                    ))
-                                  }
-                                />
-                                <span className="placeholder-right-text fw-medium position-absolute">
-                                  /hr
-                                </span>
-                              </div>
-                              <div className="col-md-3 col-12 position-relative mb-md-0 mb-2">
-                                <label className="mb-1 fw-medium">
-                                  Currency
-                                </label>
-                                <Select
-                                  components={{
-                                    DropdownIndicator: CustomDropdownIndicator,
-                                    ClearIndicator: CustomClearIndicator,
-                                  }}
-                                  defaultValue={
-                                    talent.talentDetails[tmp_index].currency ||
-                                    ""
-                                  }
-                                  onChange={(value) =>
-                                    handleTalentChange(
-                                      "currencies",
-                                      value,
-                                      index
-                                    )
-                                  }
-                                  options={currencies}
-                                  isDisabled={isFormSaved}
-                                  isClearable
-                                />
-                              </div>
+                                  ))
+                                }
+                              />
+                              <span className="placeholder-right-text fw-medium position-absolute">
+                                /hr
+                              </span>
+                            </div>
+                            <div className="col-md-3 col-12 position-relative mb-md-0 mb-2">
+                              <label className="mb-1 fw-medium">Currency</label>
+                              <Select
+                                components={{
+                                  DropdownIndicator: CustomDropdownIndicator,
+                                  ClearIndicator: CustomClearIndicator,
+                                }}
+                                defaultValue={
+                                  talent.talentDetails[tmp_index].currency || ""
+                                }
+                                onChange={(value) =>
+                                  handleTalentChange("currencies", value, index)
+                                }
+                                options={currencies}
+                                isDisabled={isFormSaved}
+                                isClearable
+                              />
                             </div>
                           </div>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
-          </div>
+              </div>
+            ))}
         </div>
       </div>
+
       <div className="d-flex justify-content-end align-items-center mt-5 ">
         <div
           className="pt-1 pb-2 px-3 d-flex justify-content-center align-items-center border border-dark fs-6 fw-medium rounded-pill lh-base me-2"
