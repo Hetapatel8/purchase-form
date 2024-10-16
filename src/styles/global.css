@@ -79,6 +79,12 @@ form.purchase_order_form .css-t3ipsp-control:hover, form.purchase_order_form .cs
     top: 50%;
     font-size: 18px,
 }
+@media only screen and (min-width: 1200px) {
+    .talent_detail_section .accordion-button {
+        top: 50%;
+        transform: translateY(-50%);
+    }
+}
 @media only screen and (max-width: 1500px) {
     form.purchase_order_form input, form.purchase_order_form .react-datepicker-wrapper input, form.purchase_order_form .css-hlgwow {
         padding-left:4px;
@@ -102,4 +108,10 @@ form.purchase_order_form .css-t3ipsp-control:hover, form.purchase_order_form .cs
     .talent_detail_section .p-remove {
         padding: 0 !important;
     }
+}
+.accordion-button:not(.collapsed)::after {
+    background-image: url('data:image/svg+xml,%3Csvg fill="%23727281" width="20px" height="20px" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"%3E%3Ctitle%3Eminus%3C/title%3E%3Cpath d="M64 232L448 232 448 280 64 280 64 232Z" /%3E%3C/svg%3E');
+}
+.accordion-button::after {
+    background-image: url('data:image/svg+xml,%3Csvg fill="%23727281" width="20px" height="20px" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"%3E%3Ctitle%3Eplus%3C/title%3E%3Cpath d="M232 280L64 280 64 232 232 232 232 64 280 64 280 232 448 232 448 280 280 280 280 448 232 448 232 280Z" /%3E%3C/svg%3E');
 }

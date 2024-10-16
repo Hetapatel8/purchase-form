@@ -11,7 +11,7 @@ const PurchaseForm = () => {
     jobTitle: "",
     jobId: "",
     talents: [],
-    talentDetails: []
+    talentDetails: [],
   };
 
   const [formData, setFormData] = useState({
@@ -44,21 +44,26 @@ const PurchaseForm = () => {
   const [isCheckedArray, setIsCheckedArray] = useState([]);
   const [isFormSaved, setIsFormSaved] = useState(false);
 
-useEffect(() => {
-  setIsCheckedArray(new Array(talentDetails.length * talentDetails[0].talents.length).fill(false));
-}, [talentDetails]);
+  useEffect(() => {
+    setIsCheckedArray(
+      new Array(talentDetails.length * talentDetails[0].talents.length).fill(
+        false
+      )
+    );
+  }, [talentDetails]);
 
-const handleCheckboxChange = (index, tmp_index) => {
-  setIsCheckedArray((prevState) => {
-    const newState = [...prevState];
-    newState[index * talentDetails[0].talents.length + tmp_index] = !newState[index * talentDetails[0].talents.length + tmp_index];
-    return newState;
-  });
-};
+  const handleCheckboxChange = (index, tmp_index) => {
+    setIsCheckedArray((prevState) => {
+      const newState = [...prevState];
+      newState[index * talentDetails[0].talents.length + tmp_index] =
+        !newState[index * talentDetails[0].talents.length + tmp_index];
+      return newState;
+    });
+  };
 
   const handleSelectChange = (name, value, index) => {
     setSelectedOption((prev) => ({ ...prev, [name]: value }));
-  
+
     if (name === "clientNames" && value) {
       const selectedClient = clientData.find(
         (client) => client.id === value.value
@@ -72,9 +77,11 @@ const handleCheckboxChange = (index, tmp_index) => {
       setJobOptions(jobs);
       setTalentDetails([initialTalentDetail]);
     }
-  
+
     if (name === "jobTitle" && value) {
-      const selectedJob = jobOptions.find((option) => option.label === value.label);
+      const selectedJob = jobOptions.find(
+        (option) => option.label === value.label
+      );
       setTalentDetails((prevDetails) => {
         const newDetails = [...prevDetails];
         if (index < newDetails.length) {
@@ -83,39 +90,56 @@ const handleCheckboxChange = (index, tmp_index) => {
             jobTitle: value.label,
             jobId: selectedJob ? selectedJob.value : "",
             talents: selectedJob ? selectedJob.talents : [],
-            talentDetails: selectedJob ? selectedJob.talents.map(() => ({
-              contractDuration: "",
-              billRate: "",
-              standardTime: "",
-              overTime: "",
-              currency: ""
-            })) : []
+            talentDetails: selectedJob
+              ? selectedJob.talents.map(() => ({
+                  contractDuration: "",
+                  billRate: "",
+                  standardTime: "",
+                  overTime: "",
+                  currency: "",
+                }))
+              : [],
           };
         }
         return newDetails;
       });
     }
   };
-  
+
   const handleInputChange = (name, value) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleTalentChange = (name, value, index, tmpIndex) => {
     setTalentDetails((prevDetails) => {
-      const newDetails = [...prevDetails]; 
-      const talent = { ...newDetails[index] }; 
-  
+      const newDetails = [...prevDetails];
+      const talent = { ...newDetails[index] };
+
       if (tmpIndex < talent.talents.length) {
-        talent.talentDetails[tmpIndex][name] = value; 
+        talent.talentDetails[tmpIndex][name] = value;
         newDetails[index] = talent;
       }
-      
+
       return newDetails;
     });
   };
   const addAnotherTalentSection = () => {
-    setTalentDetails([...talentDetails, initialTalentDetail]);
+    const newTalentDetail = {
+      jobTitle: "",
+      jobId: "",
+      talents: [],
+      talentDetails: [
+        {
+          contractDuration: "",
+          billRate: "",
+          standardTime: "",
+          overTime: "",
+          currency: "",
+        },
+      ],
+    };
+
+    setTalentDetails((prevDetails) => [...prevDetails, newTalentDetail]);
   };
 
   const handleReset = () => {
@@ -133,27 +157,35 @@ const handleCheckboxChange = (index, tmp_index) => {
   };
 
   const handleSave = (e) => {
-
-    const checkedTalents = talentDetails.map((talent, index) => {
-      const checkedTalentDetails = talent.talents.filter((tmp_talent, tmp_index) => {
-        return isCheckedArray[index * talentDetails[0].talents.length + tmp_index] !== undefined;
-      }).map((tmp_talent, tmp_index) => {
+    const checkedTalents = talentDetails
+      .map((talent, index) => {
+        const checkedTalentDetails = talent.talents
+          .filter((tmp_talent, tmp_index) => {
+            return (
+              isCheckedArray[
+                index * talentDetails[0].talents.length + tmp_index
+              ] !== undefined
+            );
+          })
+          .map((tmp_talent, tmp_index) => {
+            return {
+              talentName: tmp_talent,
+              contractDuration:
+                talent.talentDetails[tmp_index].contractDuration,
+              billRate: talent.talentDetails[tmp_index].billRate,
+              standardTime: talent.talentDetails[tmp_index].standardTime,
+              overTime: talent.talentDetails[tmp_index].overTime,
+              currency: talent.talentDetails[tmp_index].currency,
+            };
+          });
         return {
-          talentName: tmp_talent,
-          contractDuration: talent.talentDetails[tmp_index].contractDuration,
-          billRate: talent.talentDetails[tmp_index].billRate,
-          standardTime: talent.talentDetails[tmp_index].standardTime,
-          overTime: talent.talentDetails[tmp_index].overTime,
-          currency: talent.talentDetails[tmp_index].currency,
+          jobTitle: talent.jobTitle,
+          jobId: talent.jobId,
+          talents: checkedTalentDetails,
         };
-      });
-      return {
-        jobTitle: talent.jobTitle,
-        jobId: talent.jobId,
-        talents: checkedTalentDetails,
-      };
-    }).filter((talent) => talent.talents.length > 0);
-    
+      })
+      .filter((talent) => talent.talents.length > 0);
+
     const fullData = {
       formData,
       selectedOption,
@@ -161,15 +193,14 @@ const handleCheckboxChange = (index, tmp_index) => {
       talentDetails: checkedTalents,
     };
     e.preventDefault();
-    console.log('Form Data', fullData)
-    localStorage.setItem('formData', JSON.stringify(fullData));
+    console.log("Form Data", fullData);
+    localStorage.setItem("formData", JSON.stringify(fullData));
     alert("Form saved successfully!");
     setIsFormSaved(true);
   };
-  
 
   return (
-    <form className="purchase_order_form px-md-4 px-3" onSubmit={handleSave}> 
+    <form className="purchase_order_form px-md-4 px-3" onSubmit={handleSave}>
       <div className="purchase_details_section">
         <div className="row">
           <div className="col-xl col-md-6 mb-xl-0 mb-md-3 mt-2">
@@ -180,7 +211,10 @@ const handleCheckboxChange = (index, tmp_index) => {
               </span>
             </label>
             <Select
-              components={{DropdownIndicator: CustomDropdownIndicator, ClearIndicator: CustomClearIndicator}}
+              components={{
+                DropdownIndicator: CustomDropdownIndicator,
+                ClearIndicator: CustomClearIndicator,
+              }}
               value={selectedOption.clientNames}
               onChange={(value) => handleSelectChange("clientNames", value)}
               options={clientNames}
@@ -199,7 +233,10 @@ const handleCheckboxChange = (index, tmp_index) => {
               </span>
             </label>
             <Select
-              components={{DropdownIndicator: CustomDropdownIndicator, ClearIndicator: CustomClearIndicator}}
+              components={{
+                DropdownIndicator: CustomDropdownIndicator,
+                ClearIndicator: CustomClearIndicator,
+              }}
               value={formData.orderType}
               onChange={(value) => handleInputChange("orderType", value)}
               options={orderType}
@@ -241,6 +278,7 @@ const handleCheckboxChange = (index, tmp_index) => {
               onChange={(date) =>
                 setDates((prev) => ({ ...prev, receivedDate: date }))
               }
+              id="ReceivedOn"
               required
               placeholderText="Received On"
               disabled={isFormSaved}
@@ -297,15 +335,15 @@ const handleCheckboxChange = (index, tmp_index) => {
               selected={dates.startDate}
               onChange={(date) => {
                 setDates((prev) => {
-                  // Check if the end date is earlier than the new start date
                   const isEndDateInvalid = prev.endDate && date > prev.endDate;
                   return {
                     ...prev,
                     startDate: date,
-                    endDate: isEndDateInvalid ? null : prev.endDate, // Reset end date if invalid
+                    endDate: isEndDateInvalid ? null : prev.endDate,
                   };
                 });
               }}
+              id="startDate"
               required
               placeholderText="Start Date"
               disabled={isFormSaved}
@@ -323,6 +361,7 @@ const handleCheckboxChange = (index, tmp_index) => {
               onChange={(date) =>
                 setDates((prev) => ({ ...prev, endDate: date }))
               }
+              id="endDate"
               minDate={dates.startDate}
               placeholderText="End Date"
               required
@@ -353,14 +392,17 @@ const handleCheckboxChange = (index, tmp_index) => {
             />
           </div>
           <div className="col-md col-12">
-            <label htmlFor="budget" className="mb-1 fw-medium">
+            <label className="mb-1 fw-medium">
               Currency
               <span className="fs-6 fw-bold ms-1" style={{ color: "red" }}>
                 *
               </span>
             </label>
             <Select
-              components={{DropdownIndicator: CustomDropdownIndicator, ClearIndicator: CustomClearIndicator}}
+              components={{
+                DropdownIndicator: CustomDropdownIndicator,
+                ClearIndicator: CustomClearIndicator,
+              }}
               value={selectedOption.currencies}
               onChange={(value) => handleSelectChange("currencies", value)}
               options={currencies}
@@ -385,288 +427,396 @@ const handleCheckboxChange = (index, tmp_index) => {
               </div>
             )}
           </div>
-          {talentDetails.map((talent, index) => (
-            <div className="talent_detail_section mb-5" key={index}>
-              <div className="row  mt-xxl-4 mt-3">
-                <div className="col-xl-6 col-12 flex-md-row flex-column d-flex mb-3">
-                  <div className="col-md-6 col-12 p-remove mb-md-0 mb-2" style={{ paddingRight: 12 }}>
-                    <label htmlFor="jobTitle" className="mb-1 fw-medium">
-                      JOB Title/REQ Name{" "}
-                      <span
-                        className="fs-6 fw-bold ms-1"
-                        style={{ color: "red" }}
-                      >
-                        *
-                      </span>
-                    </label>
-                    <Select
-                      components={{DropdownIndicator: CustomDropdownIndicator, ClearIndicator: CustomClearIndicator}}
-                      defaultValue={talent.jobTitle}
-                      onChange={(value) =>
-                        handleSelectChange("jobTitle", value, index)
-                      }
-                      options={jobOptions}
-                      id="jobTitle"
-                      name="jobTitle"
-                      required
-                      isDisabled={isFormSaved}
-                      isClearable
-                    />
-                  </div>
-                  <div className="col-md-6 col-12 p-remove" style={{ paddingLeft: 12 }}>
-                    <label htmlFor="jobId" className="mb-1 fw-medium">
-                      JOB ID/REQ ID{" "}
-                      <span
-                        className="fs-6 fw-bold ms-1"
-                        style={{ color: "red" }}
-                      >
-                        *
-                      </span>
-                    </label>
-                    <input
-                      className="d-block col-12 "
-                      placeholder="JOB ID/REQ ID"
-                      type="text"
-                      id="jobId"
-                      name="jobId"
-                      value={talent.jobId}
-                      readOnly
-                      disabled={isFormSaved}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className=""
-                style={{
-                  background: "rgb(204, 204, 204)",
-                  height: 1,
-                  marginInline: "-24px",
-                }}
-              ></div>
-              {talent.talents.map((tmp_talent, tmp_index) => (
-                <div className="row mt-3" key={`${index}-${tmp_index}`}>
-                  <label className="d-flex align-items-center position-relative talentCheckbox">
-                    <input
-                      className="position-absolute opacity-0 border-0 checkbox_input"
-                      type="checkbox"
-                      value=""
-                      id={`talentCheckbox_${tmp_index}`}
-                      checked={isCheckedArray[index * talentDetails[0].talents.length + tmp_index] !== undefined ? isCheckedArray[index * talentDetails[0].talents.length + tmp_index] : false}
-                      onChange={() => handleCheckboxChange(index, tmp_index)}
-                      style={{
-                        width: 18,
-                        height: 18,
-                        cursor: "pointer",
-                        
-                      }}
-                    />
-                    <span
-                      className="d-inline-flex align-items-center justify-content-center align-top rounded-1 gx-3 checkbox_control"
-                      aria-hidden="true"
-                      id=""
-                      style={{
-                        width: 18,
-                        height: 18,
-                        userSelect: "none",
-                      }}
-                    ></span>
-                    <span className="fw-medium fs-6 ms-2 text-black">
-                      {tmp_talent}
-                    </span>
-                  </label>
-                  <div className="row mt-3 px-0 mx-0">
-                    <div className="col-xxl-6 col-12 flex-md-row flex-column d-flex pe-xxl-0">
+          <div className="accordion" id="accordionExample">
+            {talentDetails.length > 0 &&
+              talentDetails.map((talent, index) => (
+                <div
+                  className="talent_detail_section mb-5 accordion-item border-0"
+                  key={index}
+                >
+                  <div
+                    className="row  mt-xxl-4 mt-3 accordion-header position-relative"
+                    id={`heading${index}`}
+                  >
+                    <div className="col-xl-6 col-12 flex-md-row flex-column d-flex mb-3">
                       <div
-                        className="col-xxl-6 col-md-4 col-12 mb-md-0 mb-2 position-relative p-remove"
+                        className="col-md-6 col-12 p-remove mb-md-0 mb-2"
                         style={{ paddingRight: 12 }}
                       >
-                        <label htmlFor="orderNumber" className="mb-1 fw-medium">
-                          Contract Duration
-                        </label>
-                        <input
-                          className="d-block col-12 "
-                          placeholder="Contract Duration"
-                          type="text"
-                          id={`contractDuration_${index}_${tmp_index}`}
-                          name="contractDuration"
-                          value={talent.talentDetails[tmp_index].contractDuration || ""}
-                          disabled={isFormSaved}
-                          onChange={(e) =>
-                            handleTalentChange(
-                              "contractDuration",
-                              e.target.value,
-                              index,
-                              tmp_index
-                            )
-                          }
-                          onInput={(e) =>
-                            (e.target.value = e.target.value.replace(
-                              /[^0-9]/g,
-                              ""
-                            ))
-                          }
-                        />
-                        <span className="placeholder-right-text fw-medium position-absolute">
-                          Months
-                        </span>
-                      </div>
-                      <div
-                        className="col-xxl-3 col-md-4 mb-md-0 mb-2 position-relative p-remove"
-                        style={{ paddingRight: 12 }}
-                      >
-                        <label htmlFor="orderNumber" className="mb-1 fw-medium">
-                          Bill Rate
-                        </label>
-                        <input
-                          className="d-block col-12 "
-                          placeholder="Bill Rate"
-                          type="text"
-                          id={`billRate_${index}_${tmp_index}`}
-                          name="billRate"
-                          value={talent.talentDetails[tmp_index].billRate || ""}
-                          disabled={isFormSaved}
-                          onChange={(e) =>
-                            handleTalentChange(
-                              "billRate",
-                              e.target.value,
-                              index,
-                              tmp_index
-                            )
-                          }
-                          onInput={(e) =>
-                            (e.target.value = e.target.value.replace(
-                              /[^0-9]/g,
-                              ""
-                            ))
-                          }
-                        />
-                        <span className="placeholder-right-text fw-medium position-absolute">
-                          /hr
-                        </span>
-                      </div>
-                      <div className="col-xxl-3 col-md-4 p-remove" style={{ paddingRight: 12 }}>
-                        <label htmlFor="budget" className="mb-1 fw-medium">
-                          Currency
+                        <label htmlFor="jobTitle" className="mb-1 fw-medium">
+                          JOB Title/REQ Name{" "}
+                          <span
+                            className="fs-6 fw-bold ms-1"
+                            style={{ color: "red" }}
+                          >
+                            *
+                          </span>
                         </label>
                         <Select
-                          components={{DropdownIndicator: CustomDropdownIndicator, ClearIndicator: CustomClearIndicator}}
-                          defaultValue={talent.talentDetails[tmp_index].currency || ""}
+                          components={{
+                            DropdownIndicator: CustomDropdownIndicator,
+                            ClearIndicator: CustomClearIndicator,
+                          }}
+                          defaultValue={talent.jobTitle}
                           onChange={(value) =>
-                            handleTalentChange("currencies", value, index)
+                            handleSelectChange("jobTitle", value, index)
                           }
-                          options={currencies}
+                          options={jobOptions}
+                          id="jobTitle"
+                          name="jobTitle"
+                          required
                           isDisabled={isFormSaved}
                           isClearable
                         />
                       </div>
+                      <div
+                        className="col-md-6 col-12 p-remove"
+                        style={{ paddingLeft: 12 }}
+                      >
+                        <label htmlFor="jobId" className="mb-1 fw-medium">
+                          JOB ID/REQ ID{" "}
+                          <span
+                            className="fs-6 fw-bold ms-1"
+                            style={{ color: "red" }}
+                          >
+                            *
+                          </span>
+                        </label>
+                        <input
+                          className="d-block col-12 "
+                          placeholder="JOB ID/REQ ID"
+                          type="text"
+                          id="jobId"
+                          name="jobId"
+                          value={talent.jobId}
+                          readOnly
+                          disabled={isFormSaved}
+                        />
+                      </div>
+                      {/* <div onClick={deleteTalentSection(index)}>delete</div> */}
+                      <button
+                        type="button"
+                        className="shadow-none bg-transparent p-0 position-absolute accordion-button collapsed"
+                        data-bs-toggle="collapse"
+                        data-bs-target={`#collapse${index}`}
+                        aria-expanded="false"
+                        aria-controls={`collapse${index}`}
+                        style={{ right: 12, width: 20, height: 20 }}
+                      ></button>
                     </div>
-                    <div className="col-xxl-6 col-12 flex-md-row flex-column d-flex ps-xxl-0 mt-xxl-0 mt-3">
-                      <div
-                        className="col-md-3 col-12 position-relative mb-md-0 mb-2 p-remove"
-                        style={{ paddingRight: 12 }}
-                      >
-                        <label htmlFor="orderNumber" className="mb-1 fw-medium">
-                          Standard Time BR
-                        </label>
-                        <input
-                          className="d-block col-12 "
-                          placeholder="Standard Time BR"
-                          type="text"
-                          id={`standardTime_${index}_${tmp_index}`}
-                          name="standardTime"
-                          value={talent.talentDetails[tmp_index].standardTime || ""}
-                          onChange={(e) =>
-                            handleTalentChange(
-                              "standardTime",
-                              e.target.value,
-                              index,
-                              tmp_index
-                            )
-                          }
-                          disabled={isFormSaved}
-                          onInput={(e) =>
-                            (e.target.value = e.target.value.replace(
-                              /[^0-9]/g,
-                              ""
-                            ))
-                          }
-                        />
-                        <span className="placeholder-right-text fw-medium position-absolute">
-                          /hr
-                        </span>
-                      </div>
-                      <div className="col-md-3 col-12 position-relative mb-md-0 mb-2 p-remove" style={{ paddingRight: 12 }}>
-                        <label htmlFor="budget" className="mb-1 fw-medium">
-                          Currency
-                        </label>
-                        <Select
-                          components={{DropdownIndicator: CustomDropdownIndicator, ClearIndicator: CustomClearIndicator}}
-                          defaultValue={talent.talentDetails[tmp_index].currency || ""}
-                          onChange={(value) =>
-                            handleTalentChange("currencies", value, index)
-                          }
-                          options={currencies}
-                          isDisabled={isFormSaved}
-                          isClearable
-                        />
-                      </div>
-                      <div
-                        className="col-md-3 col-12 position-relative mb-md-0 mb-2 p-remove"
-                        style={{ paddingRight: 12 }}
-                      >
-                        <label htmlFor="orderNumber" className="mb-1 fw-medium">
-                          Over Time BR
-                        </label>
-                        <input
-                          className="d-block col-12 "
-                          placeholder="Over Time BR"
-                          type="text"
-                          id={`overTime_${index}_${tmp_index}`}
-                          name="overTime"
-                          value={talent.talentDetails[tmp_index].overTime || ""}
-                          onChange={(e) =>
-                            handleTalentChange(
-                              "overTime",
-                              e.target.value,
-                              index,
-                              tmp_index
-                            )
-                          }
-                          disabled={isFormSaved}
-                          onInput={(e) =>
-                            (e.target.value = e.target.value.replace(
-                              /[^0-9]/g,
-                              ""
-                            ))
-                          }
-                        />
-                        <span className="placeholder-right-text fw-medium position-absolute">
-                          /hr
-                        </span>
-                      </div>
-                      <div className="col-md-3 col-12 position-relative mb-md-0 mb-2">
-                        <label htmlFor="budget" className="mb-1 fw-medium">
-                          Currency
-                        </label>
-                        <Select
-                          components={{DropdownIndicator: CustomDropdownIndicator, ClearIndicator: CustomClearIndicator}}
-                          defaultValue={talent.talentDetails[tmp_index].currency || ""}
-                          onChange={(value) =>
-                            handleTalentChange("currencies", value, index)
-                          }
-                          options={currencies}
-                          isDisabled={isFormSaved}
-                          isClearable
-                        />
-                      </div>
+                  </div>
+
+                  <div
+                    className=""
+                    style={{
+                      background: "rgb(204, 204, 204)",
+                      height: 1,
+                      marginInline: "-24px",
+                    }}
+                  ></div>
+                  <div
+                    id={`collapse${index}`}
+                    className={`accordion-collapse collapse`}
+                    aria-labelledby={`heading${index}`}
+                    data-bs-parent="#accordionExample"
+                  >
+                    <div className="accordion-body p-0">
+                      {talent.talents.map((tmp_talent, tmp_index) => (
+                        <div className="row mt-3" key={`${index}-${tmp_index}`}>
+                          <label className="d-flex align-items-center position-relative talentCheckbox">
+                            <input
+                              className="position-absolute opacity-0 border-0 checkbox_input"
+                              type="checkbox"
+                              value=""
+                              id={`talentCheckbox_${tmp_index}`}
+                              checked={
+                                isCheckedArray[
+                                  index * talentDetails[0].talents.length +
+                                    tmp_index
+                                ] !== undefined
+                                  ? isCheckedArray[
+                                      index * talentDetails[0].talents.length +
+                                        tmp_index
+                                    ]
+                                  : false
+                              }
+                              onChange={() =>
+                                handleCheckboxChange(index, tmp_index)
+                              }
+                              style={{
+                                width: 18,
+                                height: 18,
+                                cursor: "pointer",
+                              }}
+                            />
+                            <span
+                              className="d-inline-flex align-items-center justify-content-center align-top rounded-1 gx-3 checkbox_control"
+                              aria-hidden="true"
+                              id=""
+                              style={{
+                                width: 18,
+                                height: 18,
+                                userSelect: "none",
+                              }}
+                            ></span>
+                            <span className="fw-medium fs-6 ms-2 text-black">
+                              {tmp_talent}
+                            </span>
+                          </label>
+                          <div className="row mt-3 px-0 mx-0">
+                            <div className="col-xxl-6 col-12 flex-md-row flex-column d-flex pe-xxl-0">
+                              <div
+                                className="col-xxl-6 col-md-4 col-12 mb-md-0 mb-2 position-relative p-remove"
+                                style={{ paddingRight: 12 }}
+                              >
+                                <label
+                                  htmlFor={`contractDuration_${index}_${tmp_index}`}
+                                  className="mb-1 fw-medium"
+                                >
+                                  Contract Duration
+                                </label>
+                                <input
+                                  className="d-block col-12 "
+                                  placeholder="Contract Duration"
+                                  type="text"
+                                  id={`contractDuration_${index}_${tmp_index}`}
+                                  name="contractDuration"
+                                  value={
+                                    talent.talentDetails[tmp_index]
+                                      .contractDuration || ""
+                                  }
+                                  disabled={isFormSaved}
+                                  onChange={(e) =>
+                                    handleTalentChange(
+                                      "contractDuration",
+                                      e.target.value,
+                                      index,
+                                      tmp_index
+                                    )
+                                  }
+                                  onInput={(e) =>
+                                    (e.target.value = e.target.value.replace(
+                                      /[^0-9]/g,
+                                      ""
+                                    ))
+                                  }
+                                />
+                                <span className="placeholder-right-text fw-medium position-absolute">
+                                  Months
+                                </span>
+                              </div>
+                              <div
+                                className="col-xxl-3 col-md-4 mb-md-0 mb-2 position-relative p-remove"
+                                style={{ paddingRight: 12 }}
+                              >
+                                <label
+                                  htmlFor={`billRate_${index}_${tmp_index}`}
+                                  className="mb-1 fw-medium"
+                                >
+                                  Bill Rate
+                                </label>
+                                <input
+                                  className="d-block col-12 "
+                                  placeholder="Bill Rate"
+                                  type="text"
+                                  id={`billRate_${index}_${tmp_index}`}
+                                  name="billRate"
+                                  value={
+                                    talent.talentDetails[tmp_index].billRate ||
+                                    ""
+                                  }
+                                  disabled={isFormSaved}
+                                  onChange={(e) =>
+                                    handleTalentChange(
+                                      "billRate",
+                                      e.target.value,
+                                      index,
+                                      tmp_index
+                                    )
+                                  }
+                                  onInput={(e) =>
+                                    (e.target.value = e.target.value.replace(
+                                      /[^0-9]/g,
+                                      ""
+                                    ))
+                                  }
+                                />
+                                <span className="placeholder-right-text fw-medium position-absolute">
+                                  /hr
+                                </span>
+                              </div>
+                              <div
+                                className="col-xxl-3 col-md-4 p-remove"
+                                style={{ paddingRight: 12 }}
+                              >
+                                <label className="mb-1 fw-medium">
+                                  Currency
+                                </label>
+                                <Select
+                                  components={{
+                                    DropdownIndicator: CustomDropdownIndicator,
+                                    ClearIndicator: CustomClearIndicator,
+                                  }}
+                                  defaultValue={
+                                    talent.talentDetails[tmp_index].currency ||
+                                    ""
+                                  }
+                                  onChange={(value) =>
+                                    handleTalentChange(
+                                      "currencies",
+                                      value,
+                                      index
+                                    )
+                                  }
+                                  options={currencies}
+                                  isDisabled={isFormSaved}
+                                  isClearable
+                                />
+                              </div>
+                            </div>
+                            <div className="col-xxl-6 col-12 flex-md-row flex-column d-flex ps-xxl-0 mt-xxl-0 mt-3">
+                              <div
+                                className="col-md-3 col-12 position-relative mb-md-0 mb-2 p-remove"
+                                style={{ paddingRight: 12 }}
+                              >
+                                <label
+                                  htmlFor={`standardTime_${index}_${tmp_index}`}
+                                  className="mb-1 fw-medium"
+                                >
+                                  Standard Time BR
+                                </label>
+                                <input
+                                  className="d-block col-12 "
+                                  placeholder="Standard Time BR"
+                                  type="text"
+                                  id={`standardTime_${index}_${tmp_index}`}
+                                  name="standardTime"
+                                  value={
+                                    talent.talentDetails[tmp_index]
+                                      .standardTime || ""
+                                  }
+                                  onChange={(e) =>
+                                    handleTalentChange(
+                                      "standardTime",
+                                      e.target.value,
+                                      index,
+                                      tmp_index
+                                    )
+                                  }
+                                  disabled={isFormSaved}
+                                  onInput={(e) =>
+                                    (e.target.value = e.target.value.replace(
+                                      /[^0-9]/g,
+                                      ""
+                                    ))
+                                  }
+                                />
+                                <span className="placeholder-right-text fw-medium position-absolute">
+                                  /hr
+                                </span>
+                              </div>
+                              <div
+                                className="col-md-3 col-12 position-relative mb-md-0 mb-2 p-remove"
+                                style={{ paddingRight: 12 }}
+                              >
+                                <label className="mb-1 fw-medium">
+                                  Currency
+                                </label>
+                                <Select
+                                  components={{
+                                    DropdownIndicator: CustomDropdownIndicator,
+                                    ClearIndicator: CustomClearIndicator,
+                                  }}
+                                  defaultValue={
+                                    talent.talentDetails[tmp_index].currency ||
+                                    ""
+                                  }
+                                  onChange={(value) =>
+                                    handleTalentChange(
+                                      "currencies",
+                                      value,
+                                      index
+                                    )
+                                  }
+                                  options={currencies}
+                                  isDisabled={isFormSaved}
+                                  isClearable
+                                />
+                              </div>
+                              <div
+                                className="col-md-3 col-12 position-relative mb-md-0 mb-2 p-remove"
+                                style={{ paddingRight: 12 }}
+                              >
+                                <label
+                                  htmlFor={`overTime_${index}_${tmp_index}`}
+                                  className="mb-1 fw-medium"
+                                >
+                                  Over Time BR
+                                </label>
+                                <input
+                                  className="d-block col-12 "
+                                  placeholder="Over Time BR"
+                                  type="text"
+                                  id={`overTime_${index}_${tmp_index}`}
+                                  name="overTime"
+                                  value={
+                                    talent.talentDetails[tmp_index].overTime ||
+                                    ""
+                                  }
+                                  onChange={(e) =>
+                                    handleTalentChange(
+                                      "overTime",
+                                      e.target.value,
+                                      index,
+                                      tmp_index
+                                    )
+                                  }
+                                  disabled={isFormSaved}
+                                  onInput={(e) =>
+                                    (e.target.value = e.target.value.replace(
+                                      /[^0-9]/g,
+                                      ""
+                                    ))
+                                  }
+                                />
+                                <span className="placeholder-right-text fw-medium position-absolute">
+                                  /hr
+                                </span>
+                              </div>
+                              <div className="col-md-3 col-12 position-relative mb-md-0 mb-2">
+                                <label className="mb-1 fw-medium">
+                                  Currency
+                                </label>
+                                <Select
+                                  components={{
+                                    DropdownIndicator: CustomDropdownIndicator,
+                                    ClearIndicator: CustomClearIndicator,
+                                  }}
+                                  defaultValue={
+                                    talent.talentDetails[tmp_index].currency ||
+                                    ""
+                                  }
+                                  onChange={(value) =>
+                                    handleTalentChange(
+                                      "currencies",
+                                      value,
+                                      index
+                                    )
+                                  }
+                                  options={currencies}
+                                  isDisabled={isFormSaved}
+                                  isClearable
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
               ))}
-            </div>
-          ))}
+          </div>
         </div>
       </div>
       <div className="d-flex justify-content-end align-items-center mt-5 ">
@@ -678,14 +828,13 @@ const handleCheckboxChange = (index, tmp_index) => {
           Reset
         </div>
         <button
-          className="pt-1 pb-2 px-3 d-flex justify-content-center align-items-center fs-6 fw-medium rounded-pill lh-base"
+          className="border-0 pt-1 pb-2 px-3 d-flex justify-content-center align-items-center fs-6 fw-medium rounded-pill lh-base"
           style={{
             cursor: "pointer",
             background: "#e8e8e8",
             color: "#898989",
           }}
           type="submit"
-          
         >
           Save
         </button>
