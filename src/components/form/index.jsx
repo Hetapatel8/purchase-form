@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
-import DatePicker from "react-datepicker";
 import { clientData, currencies, orderType } from "../../utils/formData";
 import "react-datepicker/dist/react-datepicker.css";
 import CustomDropdownIndicator from "../CustomDropdownIndicator";
@@ -83,7 +82,7 @@ const PurchaseForm = () => {
         if (index < newDetails.length) {
           newDetails[index] = {
             ...newDetails[index],
-            jobTitle: value.label,
+            jobTitle: value ? value.label : "",
             jobId: selectedJob ? selectedJob.value : "",
             talents: selectedJob ? selectedJob.talents : [],
             talentDetails: selectedJob
@@ -137,6 +136,12 @@ const PurchaseForm = () => {
 
     setTalentDetails((prevDetails) => [...prevDetails, newTalentDetail]);
   };
+  const deleteTalentSection = (index) => {
+    setTalentDetails((prevDetails) => {
+      const newDetails = prevDetails.filter((_, i) => i !== index);
+      return newDetails.length > 0 ? newDetails : [initialTalentDetail];
+    });
+  };
 
   const handleReset = () => {
     setFormData({
@@ -148,6 +153,7 @@ const PurchaseForm = () => {
     });
     setSelectedOption({ clientNames: null, currencies: null });
     setDates({ receivedDate: null, startDate: null, endDate: null });
+
     setTalentDetails([initialTalentDetail]);
     setJobOptions([]);
   };
@@ -251,7 +257,11 @@ const PurchaseForm = () => {
                           DropdownIndicator: CustomDropdownIndicator,
                           ClearIndicator: CustomClearIndicator,
                         }}
-                        defaultValue={talent.jobTitle}
+                        value={
+                          talent.jobTitle
+                            ? { label: talent.jobTitle, value: talent.jobId }
+                            : null
+                        }
                         onChange={(value) =>
                           handleSelectChange("jobTitle", value, index)
                         }
@@ -287,7 +297,7 @@ const PurchaseForm = () => {
                         disabled={isFormSaved}
                       />
                     </div>
-                    {/* <div onClick={deleteTalentSection(index)}>delete</div> */}
+                    <div onClick={() => deleteTalentSection(index)}></div>
                     <button
                       type="button"
                       className="shadow-none bg-transparent p-0 position-absolute accordion-button collapsed"
