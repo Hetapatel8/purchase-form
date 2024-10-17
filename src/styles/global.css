@@ -80,10 +80,11 @@ form.purchase_order_form .css-t3ipsp-control:hover, form.purchase_order_form .cs
     font-size: 18px,
 }
 @media only screen and (min-width: 1200px) {
-    .talent_detail_section .accordion-button {
+    .talent_detail_section .accordion-button, .talent_detail_section .delete_talent {
         top: 50%;
         transform: translateY(-50%);
     }
+    
 }
 @media only screen and (max-width: 1500px) {
     form.purchase_order_form input, form.purchase_order_form .react-datepicker-wrapper input, form.purchase_order_form .css-hlgwow {

@@ -47,14 +47,6 @@ const PurchaseForm = () => {
     );
   }, [talentDetails]);
 
-  const handleCheckboxChange = (index, tmp_index) => {
-    setIsCheckedArray((prevState) => {
-      const newState = [...prevState];
-      newState[index * talentDetails[0].talents.length + tmp_index] =
-        !newState[index * talentDetails[0].talents.length + tmp_index];
-      return newState;
-    });
-  };
 
   const handleSelectChange = (name, value, index) => {
     setSelectedOption((prev) => ({ ...prev, [name]: value }));
@@ -142,6 +134,24 @@ const PurchaseForm = () => {
       return newDetails.length > 0 ? newDetails : [initialTalentDetail];
     });
   };
+  const handleCheckboxChange = (e, index, tmp_index) => {
+    const isChecked = e.target.checked;
+    const orderType = formData.orderType?.value;
+  
+    const updatedCheckedArray = [...isCheckedArray];
+    updatedCheckedArray[index * talentDetails[0].talents.length + tmp_index] = isChecked;
+  
+    if (orderType === "Individual PO") {
+      const selectedCount = updatedCheckedArray.filter(Boolean).length;
+      if (selectedCount > 1) {
+        alert("Only 1 talent can be selected for Individual PO.");
+        return;
+      }
+    }
+  
+    setIsCheckedArray(updatedCheckedArray);
+  };
+  
 
   const handleReset = () => {
     setFormData({
@@ -156,50 +166,69 @@ const PurchaseForm = () => {
 
     setTalentDetails([initialTalentDetail]);
     setJobOptions([]);
+    setIsFormSaved(false);
   };
 
   const handleSave = (e) => {
+    e.preventDefault();
+  
+    const orderType = formData.orderType?.value;
+  
     const checkedTalents = talentDetails
       .map((talent, index) => {
         const checkedTalentDetails = talent.talents
           .filter((tmp_talent, tmp_index) => {
-            return (
-              isCheckedArray[
-                index * talentDetails[0].talents.length + tmp_index
-              ] !== undefined
-            );
+            return isCheckedArray[index * talentDetails[0].talents.length + tmp_index] === true;
           })
           .map((tmp_talent, tmp_index) => {
             return {
               talentName: tmp_talent,
-              contractDuration:
-                talent.talentDetails[tmp_index].contractDuration,
+              contractDuration: talent.talentDetails[tmp_index].contractDuration,
               billRate: talent.talentDetails[tmp_index].billRate,
               standardTime: talent.talentDetails[tmp_index].standardTime,
               overTime: talent.talentDetails[tmp_index].overTime,
               currency: talent.talentDetails[tmp_index].currency,
             };
           });
+  
         return {
           jobTitle: talent.jobTitle,
           jobId: talent.jobId,
           talents: checkedTalentDetails,
         };
       })
-      .filter((talent) => talent.talents.length > 0);
-
+      .filter((talent) => talent.talents.length > 0); 
+  
+    const selectedTalentCount = checkedTalents.reduce(
+      (total, talent) => total + talent.talents.length,
+      0
+    );
+  
+    if (orderType === "Individual PO" && selectedTalentCount !== 1) {
+      alert("Please select exactly 1 talent for Individual PO.");
+      return;
+    }
+  
+    if (orderType === "Group PO" && selectedTalentCount < 2) {
+      alert("Please select at least 2 talents for Group PO.");
+      return;
+    }
+  
     const fullData = {
       formData,
       selectedOption,
       dates,
       talentDetails: checkedTalents,
     };
-    e.preventDefault();
+  
     console.log("Form Data", fullData);
     localStorage.setItem("formData", JSON.stringify(fullData));
     alert("Form saved successfully!");
     setIsFormSaved(true);
   };
+  
+
+
 
   return (
     <form className="purchase_order_form px-md-4 px-3" onSubmit={handleSave}>
@@ -235,7 +264,7 @@ const PurchaseForm = () => {
                 key={index}
               >
                 <div
-                  className="row  mt-xxl-4 mt-3 accordion-header position-relative"
+                  className="row  mt-xxl-4 xl:mt-3 mt-4 accordion-header position-relative"
                   id={`heading${index}`}
                 >
                   <div className="col-xl-6 col-12 flex-md-row flex-column d-flex mb-3">
@@ -297,7 +326,9 @@ const PurchaseForm = () => {
                         disabled={isFormSaved}
                       />
                     </div>
-                    <div onClick={() => deleteTalentSection(index)}></div>
+                    <div onClick={() => deleteTalentSection(index)} className="position-absolute delete_talent d-flex justify-content-center align-items-center" style={{cursor: 'pointer', right: 52, marginBottom: -4, width: 22, height: 22}}>
+                      <svg fill="#727281" width="22px" height="22px" viewBox="0 0 32 32" id="icon" xmlns="http://www.w3.org/2000/svg"><rect x="12" y="12" width="2" height="12"/><rect x="18" y="12" width="2" height="12"/><path d="M4,6V8H6V28a2,2,0,0,0,2,2H24a2,2,0,0,0,2-2V8h2V6ZM8,28V8H24V28Z"/><rect x="12" y="2" width="8" height="2"/></svg>
+                    </div>
                     <button
                       type="button"
                       className="shadow-none bg-transparent p-0 position-absolute accordion-button collapsed"
@@ -329,34 +360,25 @@ const PurchaseForm = () => {
                       <div className="row mt-3" key={`${index}-${tmp_index}`}>
                         <label className="d-flex align-items-center position-relative talentCheckbox">
                           <input
-                            className="position-absolute opacity-0 border-0 checkbox_input"
-                            type="checkbox"
-                            value=""
-                            id={`talentCheckbox_${tmp_index}`}
-                            checked={
-                              isCheckedArray[
-                                index * talentDetails[0].talents.length +
-                                  tmp_index
-                              ] !== undefined
-                                ? isCheckedArray[
-                                    index * talentDetails[0].talents.length +
-                                      tmp_index
-                                  ]
-                                : false
-                            }
-                            onChange={() =>
-                              handleCheckboxChange(index, tmp_index)
-                            }
-                            style={{
-                              width: 18,
-                              height: 18,
-                              cursor: "pointer",
-                            }}
-                          />
+                          className="position-absolute opacity-0 border-0 checkbox_input"
+                          type="checkbox"
+                          value=""
+                          id={`talentCheckbox_${tmp_index}`}
+                          checked={isCheckedArray[index * talentDetails[0].talents.length + tmp_index] || false} 
+
+                          onChange={(e) => handleCheckboxChange(e, index, tmp_index)}
+
+                          disabled={formData.orderType?.value === "Individual PO" && isCheckedArray.filter(Boolean).length === 1 && !isCheckedArray[index * talentDetails[0].talents.length + tmp_index]}
+                          style={{
+                            width: 18,
+                            height: 18,
+                            cursor: "pointer",
+                          }}
+                        />
+
                           <span
                             className="d-inline-flex align-items-center justify-content-center align-top rounded-1 gx-3 checkbox_control"
                             aria-hidden="true"
-                            id=""
                             style={{
                               width: 18,
                               height: 18,
@@ -367,6 +389,7 @@ const PurchaseForm = () => {
                             {tmp_talent}
                           </span>
                         </label>
+
                         <div className="row mt-3 px-0 mx-0">
                           <div className="col-xxl-6 col-12 flex-md-row flex-column d-flex pe-xxl-0">
                             <div
